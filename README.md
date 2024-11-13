@@ -16,13 +16,13 @@ Once imported, you will have access to the following commands:
 - **`Disable-ADUser`**
 
 ### Command Help
-1. You can also see the list of commands by using Get-Module -Name CSVActiveDirectory
-2. To see the list of parameters and their use case, type Get-Help `<Command>` -Full
+1. You can also see the list of commands by using `Get-Module -Name CSVActiveDirectory`
+2. To see the list of parameters and their use case, type `Get-Help <Command> -Full`
 
 #### Get-ADUser
 This command requires that either the Identity parameter or Filter parameter be used.
 
-- To return the entire database, use Get-ADUser * or Get-ADUser -Identity * or Get-ADUser -Filter *
+- To return the entire database, use `Get-ADUser *` or `Get-ADUser -Identity *` or `Get-ADUser -Filter *`
   The default properties that are return are FirstName, LastName, DisplayName, and SamAccountName.
   To see more properties, use the -Properties parameter. Properties are comma delimited.
 
