@@ -107,7 +107,7 @@ Function New-ADUser {
             'DistinguishedName' = $DistinguishedName
             'EmailAddress' = $EmailAddress
             'EmpID' = $EmpID
-            'Job Title' = $JobTitle
+            'JobTitle' = $JobTitle
             'Guid' = $Guid
             'Created' = "$date $time"
             'Modified' = "$date $time"
@@ -116,6 +116,6 @@ Function New-ADUser {
         $Database += $NewUser
     }
     End {
-        $Database | Export-Csv -Path '.\Database\database.csv' -NoTypeInformation -Append
+        $Database | Export-Csv -Path '.\Database\database.csv' -NoTypeInformation
     }
 }
