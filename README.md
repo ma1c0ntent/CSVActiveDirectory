@@ -6,7 +6,7 @@ This repository/module/functions were designed with the idea of simulating the P
 ## Getting Started
 
 ### Import-Module
-Use Import-Module .\CSVActiveDirectory.psd1 to import the commands
+Use `Import-Module .\CSVActiveDirectory.psd1` to import the commands
 
 Once imported, you will have access to the following commands:
 - **`Get-ADUser`**
