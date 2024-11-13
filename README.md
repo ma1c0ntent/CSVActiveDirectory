@@ -26,5 +26,5 @@ This command requires that either the Identity parameter or Filter parameter be 
   The default properties that are return are FirstName, LastName, DisplayName, and SamAccountName.
   To see more properties, use the -Properties parameter. Properties are comma delimited.
 
-  .EXAMPLE `Get-ADUser -Identity jrusso -Properties *`
-  .EXAMPLE `Get-ADUser -Identity jrusso -Properties DisplayName, DistinguishedName, Enabled
+1. .EXAMPLE `Get-ADUser -Identity jrusso -Properties *`
+2. .EXAMPLE `Get-ADUser -Identity jrusso -Properties DisplayName, DistinguishedName, Enabled`
