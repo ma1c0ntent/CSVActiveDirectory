@@ -11,7 +11,7 @@ Function Get-ADUser {
 
         [Parameter(Mandatory = $true,
         ParameterSetName = "Filter")]
-        [string[]]$Filter,
+        [string]$Filter,
         
         [Parameter(Mandatory = $false)]
         [string[]]$Properties
@@ -29,7 +29,6 @@ Function Get-ADUser {
                 $param1, $param2, $param3 = $filter.Split(' ')
                 $Expression = "`$database | Where-Object { `$_.$param1 $param2 $param3}"
                 return Invoke-Expression -Command $Expression
-                #return $result
                 Break
             }
         }
@@ -40,9 +39,9 @@ Function Get-ADUser {
                     return $database | Select-Object FirstName, LastName, DisplayName, SamAccountName
                 }
                 
-                $FoundUser = $database | Where-Object { $_.SamAccountName -in $Identity }
+                $FoundUser = $database | Where-Object { $_.SamAccountName -match $Identity }
                 If ($FoundUser) {
-                    $User = [PSCustomObject]@{
+                    $User = [PSCustomObject] @{
                         'First Name' = $FoundUser.'FirstName'
                         'Last Name'  = $FoundUser.'LastName'
                         'Display Name' = $FoundUser.'DisplayName'
