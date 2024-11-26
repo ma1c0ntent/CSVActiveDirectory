@@ -9,7 +9,7 @@ Function Enable-ADAccount {
         [string[]]$Identity
     )
     Begin {
-        $database = Import-Csv -Path '.\Database\database.csv'
+        $database = Import-Csv -Path "$PSScriptRoot\..\Database\database.csv"
         $datetime = Get-Date
         $date = $datetime.ToShortDateString()
         $time = $datetime.ToShortTimeString()
@@ -21,7 +21,7 @@ Function Enable-ADAccount {
             If ($FoundUser) {
                 $FoundUser.Enabled = "TRUE"
                 $FoundUser.Modified = "$date $time"
-                $database | Export-Csv -Path '.\Database\database.csv' -NoTypeInformation
+                $database | Export-Csv -Path "$PSScriptRoot\..\Database\database.csv" -NoTypeInformation
             }
             Else {
                 Write-Warning "User not found"
@@ -29,6 +29,6 @@ Function Enable-ADAccount {
         }
     }
     End {
-       $database | Export-Csv -Path '.\Database\database.csv' -NoTypeInformation
+       $database | Export-Csv -Path "$PSScriptRoot\..\Database\database.csv" -NoTypeInformation
     }
 }
