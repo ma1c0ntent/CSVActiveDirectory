@@ -17,7 +17,7 @@ Function Get-ADUser {
         [string[]]$Properties
     )
     Begin {
-        $database = Import-Csv -Path '.\Database\database.csv'
+        $database = Import-Csv -Path "$PSScriptRoot\..\Database\database.csv"
     }
     Process {
         If ($PSCmdlet.ParameterSetName -eq "Filter") {
