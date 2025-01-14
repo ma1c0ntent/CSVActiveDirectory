@@ -12,7 +12,7 @@
 RootModule = '.\CSVActiveDirectory.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0.2'
+ModuleVersion = '1.2.0'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
