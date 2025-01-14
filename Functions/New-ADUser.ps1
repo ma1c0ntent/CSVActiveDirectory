@@ -62,21 +62,11 @@ Function New-ADUser {
         )]
         [string]$EmpID,
         
-        [Parameter(Mandatory = $true, HelpMessage = "Enter the department: HR, Security, Accounting, Marketing, Sales")]
+        [Parameter(Mandatory = $false, HelpMessage = "Enter the department: HR, Security, Accounting, Marketing, Sales")]
         [ValidateSet("HR", "Security", "Accounting", "Marketing", "Sales")]
         [string]$Department,
         
-        [Parameter(Mandatory = $true)]
-        [ValidateScript(
-            {
-                If ($_ -match '^"' -or $_ -match "^'") {
-                    throw "Job Title cannot contain quotes"
-                }
-                Else {
-                    return $true
-                }
-            }
-        )]
+        [Parameter(Mandatory = $false)]
         [string]$JobTitle,
 
         [Parameter(Mandatory = $false)]
@@ -87,7 +77,7 @@ Function New-ADUser {
     )
 
     Begin {
-        $database = Import-Csv -Path '.\Database\database.csv'
+        $database = Import-Csv -Path "$PSScriptRoot\..\Database\database.csv"
         $datetime = Get-Date
         $date = $datetime.ToShortDateString()
         $time = $datetime.ToShortTimeString()
@@ -108,6 +98,7 @@ Function New-ADUser {
             'EmailAddress' = $EmailAddress
             'EmpID' = $EmpID
             'JobTitle' = $JobTitle
+            'Department' = $Department
             'Guid' = $Guid
             'Created' = "$date $time"
             'Modified' = "$date $time"
@@ -116,6 +107,6 @@ Function New-ADUser {
         $Database += $NewUser
     }
     End {
-        $Database | Export-Csv -Path '.\Database\database.csv' -NoTypeInformation
+        $Database | Export-Csv -Path "$PSScriptRoot\..\Database\database.csv" -NoTypeInformation
     }
 }
