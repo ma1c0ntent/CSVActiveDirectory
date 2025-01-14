@@ -18,10 +18,19 @@ Function Enable-ADAccount {
     Process {
         Foreach ($User in $Identity) {
             $FoundUser = $database | Where-Object { $_.SamAccountName -in $User }
-            If ($FoundUser) {
+            If ($FoundUser -AND $FoundUser.Enabled -eq "FALSE") {
                 $FoundUser.Enabled = "TRUE"
                 $FoundUser.Modified = "$date $time"
-                $database | Export-Csv -Path "$PSScriptRoot\..\Database\database.csv" -NoTypeInformation
+
+                If($PSBoundParameters.ContainsKey("Verbose")) {
+                    Write-Verbose "Found user $($FoundUser.SamAccountName)"
+                    Write-Verbose "User $($FoundUser.SamAccountName) currently disabled"
+                    Write-Verbose "Enabling user $($FoundUser.SamAccountName)"
+                    Write-Verbose "User $($FoundUser.SamAccountName) enabled"
+                }
+            }
+            ElseIf($FoundUser -AND $FoundUser.Enabled -eq "TRUE") {
+                Write-Warning "User $($FoundUser.SamAccountName) already enabled"
             }
             Else {
                 Write-Warning "User not found"
