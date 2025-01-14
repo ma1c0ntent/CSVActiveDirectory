@@ -78,8 +78,8 @@ Function New-ADUser {
     Begin {
         $database = Import-Csv -Path "$PSScriptRoot\..\Database\database.csv"
         
-        If ($database | Where-Object { $_.EmpID -eq $EmpID -and $_.SamAccountName -eq $SamAccountName }) {
-            #Write-Warning "$FirstName $LastName already exists"
+        If ($database | Where-Object { $_.EmpID -eq $EmpID -and $_.SamAccountName -match $SamAccountName }) {
+            Write-Verbose "$FirstName $LastName already exists, skipping"
             Continue
         }
         
@@ -118,10 +118,8 @@ Function New-ADUser {
             'Modified' = "$date $time"
             'Enabled' = $Enabled
         }
-        #$Database += $NewUser
-        $NewUser | Export-Csv -Path "$PSScriptRoot\..\Database\database.csv" -Append -NoTypeInformation
     }
     End {
-        #$Database | Export-Csv -Path "$PSScriptRoot\..\Database\database.csv" -NoTypeInformation
+        $NewUser | Export-Csv -Path "$PSScriptRoot\..\Database\database.csv" -Append -NoTypeInformation
     }
 }
