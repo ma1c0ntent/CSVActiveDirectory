@@ -38,12 +38,11 @@ Function New-ADUser {
         [Parameter(Mandatory = $true)]
         [ValidateScript(
             {
-                If ($_ -match "^\w*\@\w*\.\w*$") {
+                If ($_ -match "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$") {
                     return $true
                 }
                 Else {
-                    throw "Email address is not valid"
-                    
+                    throw "Email: $emailAddress address is not valid"
                 }
             }
         )]
@@ -78,6 +77,21 @@ Function New-ADUser {
 
     Begin {
         $database = Import-Csv -Path "$PSScriptRoot\..\Database\database.csv"
+        
+        If ($database | Where-Object { $_.EmpID -eq $EmpID -and $_.SamAccountName -eq $SamAccountName }) {
+            #Write-Warning "$FirstName $LastName already exists"
+            Continue
+        }
+        
+        ElseIf ( $database | Where-Object { $_.SamAccountName -eq $SamAccountName -and $_.EmpID -ne $EmpID }) {
+            Write-Warning "$SamAccountName for $FirstName $LastName already exists, creating unique name"
+            $num = $(Get-Random -Minimum 1 -Maximum 9001)
+            $SamAccountName = $SamAccountName + $num
+            $EmailAddress = $EmailAddress.Replace("@", "$num@")
+            Write-Verbose "Changed to $SamAccountName"
+            Write-Verbose "Email Address changed to $EmailAddress"
+        }
+        
         $datetime = Get-Date
         $date = $datetime.ToShortDateString()
         $time = $datetime.ToShortTimeString()
@@ -104,9 +118,10 @@ Function New-ADUser {
             'Modified' = "$date $time"
             'Enabled' = $Enabled
         }
-        $Database += $NewUser
+        #$Database += $NewUser
+        $NewUser | Export-Csv -Path "$PSScriptRoot\..\Database\database.csv" -Append -NoTypeInformation
     }
     End {
-        $Database | Export-Csv -Path "$PSScriptRoot\..\Database\database.csv" -NoTypeInformation
+        #$Database | Export-Csv -Path "$PSScriptRoot\..\Database\database.csv" -NoTypeInformation
     }
 }
