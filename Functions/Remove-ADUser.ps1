@@ -16,11 +16,9 @@ Function Remove-ADUser {
             $FoundUser = $database | Where-Object { $_.SamAccountName -in $User }
             If ($FoundUser) {
                 $database = $database | Where-Object { $_.SamAccountName -notin $User }
-                If($PSBoundParameters.ContainsKey("Verbose")) {
                     Write-Verbose "Found user $($FoundUser.SamAccountName)"
                     Write-Verbose "Removing user $($FoundUser.SamAccountName)"
                     Write-Verbose "User $($FoundUser.SamAccountName) removed"
-                }
             }
             Else {
                 Write-Warning "User not found"
