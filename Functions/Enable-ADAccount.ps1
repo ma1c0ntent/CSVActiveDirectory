@@ -21,13 +21,10 @@ Function Enable-ADAccount {
             If ($FoundUser -AND $FoundUser.Enabled -eq "FALSE") {
                 $FoundUser.Enabled = "TRUE"
                 $FoundUser.Modified = "$date $time"
-
-                If($PSBoundParameters.ContainsKey("Verbose")) {
                     Write-Verbose "Found user $($FoundUser.SamAccountName)"
                     Write-Verbose "User $($FoundUser.SamAccountName) currently disabled"
                     Write-Verbose "Enabling user $($FoundUser.SamAccountName)"
                     Write-Verbose "User $($FoundUser.SamAccountName) enabled"
-                }
             }
             ElseIf($FoundUser -AND $FoundUser.Enabled -eq "TRUE") {
                 Write-Warning "User $($FoundUser.SamAccountName) already enabled"
