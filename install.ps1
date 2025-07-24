@@ -11,6 +11,7 @@ param(
 )
 
 # Initialize emoji variables for compatibility
+. .\Functions\Private\Get-Emoji.ps1
 $SuccessEmoji = Get-Emoji -Type "Success"
 $ErrorEmoji = Get-Emoji -Type "Error"
 $WarningEmoji = Get-Emoji -Type "Warning"
