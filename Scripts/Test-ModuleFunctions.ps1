@@ -88,7 +88,7 @@ try {
 }
 
 try {
-    $SearchResults = Search-ADAccount -Filter "Department -eq 'IT'" | Select-Object -First 2
+    $SearchResults = Search-ADAccount -LockedOut | Select-Object -First 2
     Write-Host "$($SuccessEmoji) Search-ADAccount working (found $($SearchResults.Count) results)" -ForegroundColor Green
 } catch {
     Write-Host "$($ErrorEmoji) Search-ADAccount failed: $_" -ForegroundColor Red
