@@ -362,8 +362,3 @@ For issues, questions, or contributions:
 - Review the test files in the `Tests/` directory for compatibility
 - Test your changes in both PowerShell versions
 - Ensure emoji compatibility using the `Get-Emoji` function
-
----
-
-*Last Updated: $(Get-Date -Format "yyyy-MM-dd")*
-*Tested Versions: PowerShell 5.1.19041.1, PowerShell 7.4.0*
