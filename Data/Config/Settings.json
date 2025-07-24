@@ -111,5 +111,8 @@
     "BatchSize": 100,
     "MaxConcurrentOperations": 5,
     "EnableLazyLoading": true
+  },
+  "TestSection": {
+    "TestKey": "TestValue"
   }
 }

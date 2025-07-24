@@ -13,7 +13,7 @@ The repository comes with an empty database for security. You must create users 
 
 ```powershell
 # Option 1: One-click installer (RECOMMENDED)
-.\INSTALL.ps1
+.\install.ps1
 
 # Option 2: Manual user creation
 .\Scripts\Create-Users.ps1
@@ -42,7 +42,7 @@ Get-ADUser -Identity "*" | Select-Object -First 3
 
 ### Standard Installation
 ```powershell
-.\INSTALL.ps1
+.\install.ps1
 ```
 - Creates 150 users with 30% risk scenarios
 - Runs security assessment
@@ -51,10 +51,10 @@ Get-ADUser -Identity "*" | Select-Object -First 3
 ### Custom Installation
 ```powershell
 # Skip user creation (advanced users only)
-.\INSTALL.ps1 -SkipDatabase
+.\install.ps1 -SkipDatabase
 
 # Skip security test
-.\INSTALL.ps1 -SkipSecurityTest
+.\install.ps1 -SkipSecurityTest
 
 # Manual user creation with custom settings
 .\Scripts\Create-Users.ps1 -UserCount 100 -RiskPercentage 20
@@ -110,7 +110,7 @@ Get-ADUser -Identity "bfoster" -Properties *
 .\Scripts\Get-IOCs.ps1 -Username "jmorales"
 
 # Enterprise security report
-.\Scripts\Get-ADSecurityReport-Enterprise.ps1 -EnhancedIoCDetection
+.\Scripts\Get-SecurityReport.ps1 -EnhancedIoCDetection
 ```
 
 ### Test User Management

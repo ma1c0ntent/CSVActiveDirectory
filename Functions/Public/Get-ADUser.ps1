@@ -30,7 +30,7 @@ Function Get-ADUser {
                     }
                     return $users
                 } else {
-                    $users = $database | Select-Object FirstName, LastName, DisplayName, SamAccountName
+                    $users = $database | Select-Object FirstName, LastName, DisplayName, SamAccountName, Enabled
                     foreach ($user in $users) {
                         $user.PSTypeNames.Insert(0, "ADUser")
                     }
@@ -61,7 +61,7 @@ Function Get-ADUser {
             If ($Identity -and (-not($Properties))) {
                 
                 If ($Identity -eq "*") {
-                    $users = $database | Select-Object FirstName, LastName, DisplayName, SamAccountName
+                    $users = $database | Select-Object FirstName, LastName, DisplayName, SamAccountName, Enabled
                     foreach ($user in $users) {
                         $user.PSTypeNames.Insert(0, "ADUser")
                     }
@@ -75,6 +75,7 @@ Function Get-ADUser {
                         'LastName'  = $FoundUser.'LastName'
                         'DisplayName' = $FoundUser.'DisplayName'
                         'SamAccountName' = $FoundUser.'SamAccountName'
+                        'Enabled' = $FoundUser.'Enabled'
                     }
                     $User.PSTypeNames.Insert(0, "ADUser")
                     return $User

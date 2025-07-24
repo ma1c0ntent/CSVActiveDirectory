@@ -179,17 +179,12 @@ Function Show-ADStatus {
         Error = "Red"
     }
     
-    $Icons = @{
-        Info = "i"
-        Success = "OK"
-        Warning = "!"
-        Error = "X"
-    }
+    # Use Get-Emoji for cross-version compatibility
+    $Emoji = Get-Emoji -Type $Type
     
     $Color = $Colors[$Type]
-    $Icon = $Icons[$Type]
     
-    Write-Host "$Icon " -ForegroundColor $Color -NoNewline
+    Write-Host "$Emoji " -ForegroundColor $Color -NoNewline
     Write-Host $Message -ForegroundColor White
     
     if ($Details) {

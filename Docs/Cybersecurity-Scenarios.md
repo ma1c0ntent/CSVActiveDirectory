@@ -163,7 +163,7 @@ The enhanced database generation script creates 150 users with approximately 30%
 
 1. **Run the script**: `.\Scripts\Create-150UserDatabase.ps1`
 2. **Review the output**: Check risk statistics and recommendations
-3. **Test with security tools**: Use `Get-ADSecurityReport-Enterprise.ps1`
+3. **Test with security tools**: Use `Get-SecurityReport.ps1`
 4. **Analyze patterns**: Review the generated risk scenarios
 5. **Customize scenarios**: Modify the `$RiskScenarios` array as needed
 

@@ -12,7 +12,7 @@
 RootModule = '.\CSVActiveDirectory.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.2.0'
+ModuleVersion = '1.3.0'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -69,7 +69,7 @@ FormatsToProcess = @("Data\Formats\ADUser.format.ps1xml")
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = @("Get-ADUser", "New-ADUser", "Remove-ADUser", "Enable-ADAccount", "Disable-ADAccount", "Get-ADConfig", "Set-ADConfig", "Test-ADConfig", "Set-ADAccountPassword", "Show-ADProgress", "Start-ADOperation", "Update-ADOperation", "Complete-ADOperation", "Show-ADBulkProgress", "Show-ADStatus", "Get-ADPasswordPolicy", "Test-ADPasswordComplexity", "ConvertTo-ADPasswordHash", "Test-ADPassword", "Search-ADAccount")
+FunctionsToExport = @("Get-ADUser", "New-ADUser", "Remove-ADUser", "Enable-ADAccount", "Disable-ADAccount", "Get-ADConfig", "Set-ADConfig", "Test-ADConfig", "Set-ADAccountPassword", "Show-ADProgress", "Start-ADOperation", "Update-ADOperation", "Complete-ADOperation", "Show-ADBulkProgress", "Show-ADStatus", "Get-ADPasswordPolicy", "Test-ADPasswordComplexity", "ConvertTo-ADPasswordHash", "Test-ADPassword", "Search-ADAccount", "Get-Emoji", "Write-EmojiMessage")
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()
@@ -107,7 +107,56 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        # ReleaseNotes = ''
+        ReleaseNotes = @'
+Version 1.3.0 - 2025-07-23
+
+FIXED:
+- Install Script Bug: Fixed -SkipSecurityTest parameter not working correctly in install.ps1
+  - Added -SkipSecurityTest parameter to Create-Users.ps1 script
+  - Implemented proper parameter splatting for reliable parameter passing between scripts
+  - Fixed switch parameter handling to prevent security report from running when skipped
+
+ADDED:
+- PowerShell 5.1 & 7+ Compatibility: Comprehensive emoji support across PowerShell versions
+  - Modern Unicode emoji method using [char]::ConvertFromUtf32()
+  - Centralized Get-Emoji function for consistent display across versions
+  - Automatic version detection and appropriate emoji method selection
+  - ASCII fallbacks for PowerShell 5.1 compatibility
+  - Updated all scripts to use centralized emoji function
+
+ENHANCED:
+- Get-IOCs HTML Report: Major interactive enhancements
+  - Clickable IoC items to reveal detailed breakdowns
+  - Collapsible IoC category cards with smooth animations
+  - Detailed log breakdowns showing why each indicator is flagged
+  - Enhanced JavaScript with proper event handling
+  - Improved CSS grid layout for better user experience
+  - Confidence level fix (capped at 100%)
+  - Default collapsed state with quick summaries
+
+TECHNICAL IMPROVEMENTS:
+- Emoji Compatibility: All scripts updated for consistent display
+  - Updated: install.ps1, Get-IOCs.ps1, Get-SecurityReport.ps1, Create-Users.ps1, Queries.ps1, Show-ADStatus.ps1
+  - Replaced hardcoded Unicode emojis with function calls
+  - Added bullet point support with ASCII alternatives
+- Parameter Passing: Improved reliability of switch parameter passing between scripts
+- Error Handling: Enhanced compatibility with PowerShell 5.1 syntax
+- Performance: Fixed Measure-Object property errors in PowerShell 5.1
+
+NEW SCRIPTS:
+- Cleanup-Backups.ps1: Comprehensive backup management script
+  - Age-based deletion with -DeleteAfterDays parameter
+  - Delete all backups with -DeleteAll parameter
+  - Safety features: dry run mode, confirmation prompts, WhatIf support
+  - Detailed reporting with file age, size, and disk space freed
+  - PowerShell 5.1 and 7+ compatibility
+
+DOCUMENTATION:
+- Updated installation guide with -SkipSecurityTest parameter usage
+- Enhanced examples showing emoji compatibility
+- Comprehensive Cleanup-Backups script guide
+- Improved user feedback for skipped operations
+'@
 
     } # End of PSData hashtable
 

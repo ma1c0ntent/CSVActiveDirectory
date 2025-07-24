@@ -11,7 +11,7 @@ This comprehensive guide combines cybersecurity scenarios and enhanced Indicator
 - **30% risky users** with various threat patterns
 - **Real-world incident response** scenarios
 
-### 2. Enhanced IoC Detection (`Get-ADSecurityReport-Enterprise.ps1`)
+### 2. Enhanced IoC Detection (`Get-SecurityReport.ps1`)
 - **Advanced threat detection** patterns
 - **Real-time security assessment**
 - **CSV export with IoC categorization**
@@ -178,10 +178,10 @@ This comprehensive guide combines cybersecurity scenarios and enhanced Indicator
 ### Enhanced Security Report
 ```powershell
 # Run with enhanced IoC detection
-.\Scripts\Get-ADSecurityReport-Enterprise.ps1 -EnhancedIoCDetection
+.\Scripts\Get-SecurityReport.ps1 -EnhancedIoCDetection
 
 # Export to CSV with IoC categories
-.\Scripts\Get-ADSecurityReport-Enterprise.ps1 -EnhancedIoCDetection -ExportCSV "Reports\SecurityReport.csv"
+.\Scripts\Get-SecurityReport.ps1 -EnhancedIoCDetection -ExportCSV "Reports\SecurityReport.csv"
 ```
 
 ### IoC Category Analysis
@@ -236,7 +236,7 @@ Import-Csv "Reports\SecurityReport.csv" | Group-Object IoCCategory | Sort-Object
 }
 
 # IoC detection patterns
-# Add to detection logic in Get-ADSecurityReport-Enterprise.ps1
+# Add to detection logic in Get-SecurityReport.ps1
 ```
 
 ### Modifying Detection Thresholds

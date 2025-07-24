@@ -45,7 +45,9 @@ function Show-QueryResults {
     if ($Results.Count -gt 0) {
         $Results | Format-Table SamAccountName, DisplayName, Department, Title, Enabled, LastLogon, BadPasswordCount, LockoutTime -AutoSize -Wrap
     } else {
-        Write-Host "✅ No accounts found matching this criteria." -ForegroundColor Green
+        $SuccessEmoji = Get-Emoji -Type "Success"
+$BulletEmoji = Get-Emoji -Type "Bullet"
+        Write-Host "$SuccessEmoji No accounts found matching this criteria." -ForegroundColor Green
     }
     Write-Host ""
 }
@@ -986,28 +988,28 @@ function Invoke-AllQueries {
 
 Write-Host "=== AD SECURITY QUERIES LOADED ===" -ForegroundColor Green
 Write-Host "Available functions:" -ForegroundColor Cyan
-Write-Host "• Find-LockedButEnabledAccounts" -ForegroundColor White
-Write-Host "• Find-HighFailedPasswordAttempts" -ForegroundColor White
-Write-Host "• Find-NeverLoggedOnButEnabled" -ForegroundColor White
-Write-Host "• Find-UnusedServiceAccounts" -ForegroundColor White
-Write-Host "• Find-PrivilegedAccountPasswordChanges" -ForegroundColor White
-Write-Host "• Find-ExpiredButEnabledAccounts" -ForegroundColor White
-Write-Host "• Find-ServiceAccountsWithAdminPrivileges" -ForegroundColor White
-Write-Host "• Find-SuspiciousAccountNaming" -ForegroundColor White
-Write-Host "• Find-InactiveButEnabledAccounts" -ForegroundColor White
-Write-Host "• Find-OldPasswords" -ForegroundColor White
-Write-Host "• Find-HighActivityLockedAccounts" -ForegroundColor White
-Write-Host "• Find-SuspiciousAuthPatterns" -ForegroundColor White
-Write-Host "• Find-ServiceAccountOffHoursActivity" -ForegroundColor White
-Write-Host "• Find-HighActivityRecentLogons" -ForegroundColor White
-Write-Host "• Find-AccountsExpiringSoon" -ForegroundColor White
-Write-Host "• Find-RecentlyActiveDisabledAccounts" -ForegroundColor White
-Write-Host "• Find-ModerateFailedPasswordAttempts" -ForegroundColor White
-Write-Host "• Find-NewAccountsNoActivity" -ForegroundColor White
-Write-Host "• Find-NewSuspiciousAccounts" -ForegroundColor White
-Write-Host "• Find-RoleDepartmentMismatches" -ForegroundColor White
-Write-Host "• Find-UnusualActivityPatterns" -ForegroundColor White
-Write-Host "• Find-RecentlyModifiedAccounts" -ForegroundColor White
-Write-Host "• Invoke-AllQueries" -ForegroundColor Green
+Write-Host "$($BulletEmoji) Find-LockedButEnabledAccounts" -ForegroundColor White
+Write-Host "$($BulletEmoji) Find-HighFailedPasswordAttempts" -ForegroundColor White
+Write-Host "$($BulletEmoji) Find-NeverLoggedOnButEnabled" -ForegroundColor White
+Write-Host "$($BulletEmoji) Find-UnusedServiceAccounts" -ForegroundColor White
+Write-Host "$($BulletEmoji) Find-PrivilegedAccountPasswordChanges" -ForegroundColor White
+Write-Host "$($BulletEmoji) Find-ExpiredButEnabledAccounts" -ForegroundColor White
+Write-Host "$($BulletEmoji) Find-ServiceAccountsWithAdminPrivileges" -ForegroundColor White
+Write-Host "$($BulletEmoji) Find-SuspiciousAccountNaming" -ForegroundColor White
+Write-Host "$($BulletEmoji) Find-InactiveButEnabledAccounts" -ForegroundColor White
+Write-Host "$($BulletEmoji) Find-OldPasswords" -ForegroundColor White
+Write-Host "$($BulletEmoji) Find-HighActivityLockedAccounts" -ForegroundColor White
+Write-Host "$($BulletEmoji) Find-SuspiciousAuthPatterns" -ForegroundColor White
+Write-Host "$($BulletEmoji) Find-ServiceAccountOffHoursActivity" -ForegroundColor White
+Write-Host "$($BulletEmoji) Find-HighActivityRecentLogons" -ForegroundColor White
+Write-Host "$($BulletEmoji) Find-AccountsExpiringSoon" -ForegroundColor White
+Write-Host "$($BulletEmoji) Find-RecentlyActiveDisabledAccounts" -ForegroundColor White
+Write-Host "$($BulletEmoji) Find-ModerateFailedPasswordAttempts" -ForegroundColor White
+Write-Host "$($BulletEmoji) Find-NewAccountsNoActivity" -ForegroundColor White
+Write-Host "$($BulletEmoji) Find-NewSuspiciousAccounts" -ForegroundColor White
+Write-Host "$($BulletEmoji) Find-RoleDepartmentMismatches" -ForegroundColor White
+Write-Host "$($BulletEmoji) Find-UnusualActivityPatterns" -ForegroundColor White
+Write-Host "$($BulletEmoji) Find-RecentlyModifiedAccounts" -ForegroundColor White
+Write-Host "$($BulletEmoji) Invoke-AllQueries" -ForegroundColor Green
 Write-Host ""
 Write-Host "Highlight any function above and press F8 to run it!" -ForegroundColor Yellow 

@@ -118,7 +118,7 @@ Describe "Configuration Management" {
     }
 
     Context "Configuration Integration" {
-        It "Should handle complete configuration workflow: Get → Modify → Test → Set" {
+        It "Should handle complete configuration workflow: Get -> Modify -> Test -> Set" {
             # Step 1: Get current configuration
             $OriginalConfig = Get-ADConfig
             $OriginalConfig | Should Not BeNullOrEmpty

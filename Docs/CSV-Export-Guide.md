@@ -12,7 +12,7 @@ This guide covers both export formats and their use cases.
 ## Export Formats
 
 ### CSV Export (Data Analysis)
-**Script**: `Get-ADSecurityReport-Enterprise.ps1`
+**Script**: `Get-SecurityReport.ps1`
 
 #### Default Export (Recommended)
 ```powershell
@@ -55,23 +55,23 @@ This guide covers both export formats and their use cases.
 
 #### 1. Default Export (Recommended)
 ```powershell
-.\Scripts\Get-ADSecurityReport-Enterprise.ps1 -EnhancedIoCDetection
+.\Scripts\Get-SecurityReport.ps1 -EnhancedIoCDetection
 ```
 **Automatically saves to**: `%USERPROFILE%\Documents\ADSecurityReport\ADRiskAssessmentYYYYMMDD-HHMMSS.csv`
 
 #### 2. Custom Path Export
 ```powershell
-.\Scripts\Get-ADSecurityReport-Enterprise.ps1 -EnhancedIoCDetection -ExportCSV "Reports\SecurityReport_IoC.csv"
+.\Scripts\Get-SecurityReport.ps1 -EnhancedIoCDetection -ExportCSV "Reports\SecurityReport_IoC.csv"
 ```
 
 #### 3. Timestamped Export
 ```powershell
-.\Scripts\Get-ADSecurityReport-Enterprise.ps1 -EnhancedIoCDetection -ExportCSV "Reports\SecurityReport_$(Get-Date -Format 'yyyyMMdd-HHmmss').csv"
+.\Scripts\Get-SecurityReport.ps1 -EnhancedIoCDetection -ExportCSV "Reports\SecurityReport_$(Get-Date -Format 'yyyyMMdd-HHmmss').csv"
 ```
 
 #### 4. Custom Parameters with Export
 ```powershell
-.\Scripts\Get-ADSecurityReport-Enterprise.ps1 -EnhancedIoCDetection -InactiveDays 60 -PasswordAgeDays 45 -ExportCSV "Reports\CustomSecurityReport.csv"
+.\Scripts\Get-SecurityReport.ps1 -EnhancedIoCDetection -InactiveDays 60 -PasswordAgeDays 45 -ExportCSV "Reports\CustomSecurityReport.csv"
 ```
 
 ### HTML Export Examples

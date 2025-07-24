@@ -2,6 +2,47 @@
 
 All notable changes to the CSVActiveDirectory module will be documented in this file.
 
+## [1.3.0] - 2025-07-23
+
+### Fixed
+- **Install Script Bug**: Fixed `-SkipSecurityTest` parameter not working correctly in `install.ps1`
+  - Added `-SkipSecurityTest` parameter to `Create-Users.ps1` script
+  - Implemented proper parameter splatting for reliable parameter passing between scripts
+  - Fixed switch parameter handling to prevent security report from running when skipped
+  - Added conditional logic to respect the skip parameter in database creation process
+
+### Added
+- **PowerShell 5.1 & 7+ Compatibility**: Comprehensive emoji support across PowerShell versions
+  - **Modern Unicode Emoji Method**: Implemented `[char]::ConvertFromUtf32()` for reliable emoji display
+  - **Centralized Emoji Function**: `Get-Emoji` function provides consistent emoji display across versions
+  - **Automatic Version Detection**: Scripts automatically detect PowerShell version and use appropriate emoji method
+  - **ASCII Fallbacks**: Graceful fallback to ASCII alternatives when Unicode emojis aren't supported
+  - **Updated All Scripts**: All scripts now use centralized emoji function instead of hardcoded Unicode
+
+### Enhanced
+- **Get-IOCs HTML Report**: Major enhancements to HTML report functionality
+  - **Clickable IoC Items**: Individual IoC indicators are now clickable to reveal detailed breakdowns
+  - **Collapsible Categories**: IoC category cards can be expanded/collapsed with smooth animations
+  - **Detailed Log Breakdowns**: Click on individual indicators to see logs explaining why each is flagged as an IoC
+  - **Enhanced JavaScript**: Smooth expand/collapse animations with proper event handling
+  - **Improved CSS Grid Layout**: All user info cards now display in a single row for better layout
+  - **Confidence Level Fix**: Capped confidence increments at 100% to prevent unrealistic values
+  - **Better User Experience**: Default collapsed state with quick summaries and smooth transitions
+
+### Technical Improvements
+- **Emoji Compatibility**: All scripts updated to use `Get-Emoji` function for consistent display
+  - Updated: `install.ps1`, `Get-IOCs.ps1`, `Get-SecurityReport.ps1`, `Create-Users.ps1`, `Queries.ps1`, `Show-ADStatus.ps1`
+  - Replaced hardcoded Unicode emojis with function calls
+  - Added bullet point support with ASCII dash alternatives for PowerShell 5.1
+- **Parameter Passing**: Improved reliability of switch parameter passing between scripts
+- **Error Handling**: Enhanced compatibility with PowerShell 5.1 syntax (replaced null coalescing operator `??`)
+- **Performance**: Fixed `Measure-Object` property errors in PowerShell 5.1
+
+### Documentation
+- **Updated Installation Guide**: Clarified `-SkipSecurityTest` parameter usage
+- **Enhanced Examples**: Updated demo scripts to show emoji compatibility
+- **Improved User Feedback**: Clear messages when skipping operations
+
 ## [1.2.0] - 2025-07-22
 
 ### Added
@@ -12,7 +53,7 @@ All notable changes to the CSVActiveDirectory module will be documented in this 
 - **Detailed Threat Analysis**: Comprehensive IoC detection with individual indicators and attack types
 - **Actionable Recommendations**: Prioritized response actions based on threat severity
 - **Setup Documentation**: Comprehensive setup guide in Docs/SETUP.md emphasizing user creation requirement after cloning
-- **Installation Warnings**: Clear messaging about database population requirement in INSTALL.ps1
+- **Installation Warnings**: Clear messaging about database population requirement in install.ps1
 
 ### Features
 - **HTML Report Generation**: Professional reports suitable for management presentations

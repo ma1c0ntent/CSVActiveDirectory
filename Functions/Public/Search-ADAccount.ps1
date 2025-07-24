@@ -1,29 +1,50 @@
 Function Search-ADAccount {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory = $false,
-        Position = 0,
-        HelpMessage = "LDAP filter to search for accounts"
-        )]
-        [string]$Filter = "*",
+        # Account State Parameters (matching real AD cmdlet)
+        [Parameter(Mandatory = $false)]
+        [switch]$AccountDisabled,
 
-        [Parameter(Mandatory = $false,
-        Position = 1,
-        HelpMessage = "Search by account identity (SamAccountName, DisplayName, or Email)"
-        )]
-        [string]$Identity,
+        [Parameter(Mandatory = $false)]
+        [switch]$AccountExpired,
 
+        [Parameter(Mandatory = $false)]
+        [switch]$AccountExpiring,
+
+        [Parameter(Mandatory = $false)]
+        [switch]$AccountInactive,
+
+        [Parameter(Mandatory = $false)]
+        [switch]$LockedOut,
+
+        [Parameter(Mandatory = $false)]
+        [switch]$PasswordExpired,
+
+        [Parameter(Mandatory = $false)]
+        [switch]$PasswordNeverExpires,
+
+        # Search Scope Parameters
         [Parameter(Mandatory = $false)]
         [ValidateSet("Base", "OneLevel", "Subtree")]
         [string]$SearchScope = "Subtree",
 
         [Parameter(Mandatory = $false)]
-        [ValidateSet("All", "Users", "Computers", "Groups")]
-        [string]$SearchBase = "Users",
+        [string]$SearchBase,
 
         [Parameter(Mandatory = $false)]
-        [string[]]$Properties,
+        [switch]$UsersOnly,
 
+        [Parameter(Mandatory = $false)]
+        [switch]$ComputersOnly,
+
+        # Time-based Parameters
+        [Parameter(Mandatory = $false)]
+        [DateTime]$DateTime,
+
+        [Parameter(Mandatory = $false)]
+        [TimeSpan]$TimeSpan,
+
+        # Result Control Parameters
         [Parameter(Mandatory = $false)]
         [ValidateRange(1, 1000)]
         [int]$ResultPageSize = 100,
@@ -32,15 +53,7 @@ Function Search-ADAccount {
         [ValidateRange(1, 10000)]
         [int]$ResultSetSize = 1000,
 
-        [Parameter(Mandatory = $false)]
-        [switch]$IncludeDeletedObjects,
-
-        [Parameter(Mandatory = $false)]
-        [switch]$Tombstone,
-
-        [Parameter(Mandatory = $false)]
-        [switch]$ShowDeleted,
-
+        # Connection Parameters (simulated)
         [Parameter(Mandatory = $false)]
         [string]$Server,
 
@@ -48,55 +61,8 @@ Function Search-ADAccount {
         [System.Management.Automation.PSCredential]$Credential,
 
         [Parameter(Mandatory = $false)]
-        [switch]$AuthType,
-
-        [Parameter(Mandatory = $false)]
-        [switch]$UseSSL,
-
-        [Parameter(Mandatory = $false)]
-        [switch]$LockedOut,
-
-        [Parameter(Mandatory = $false)]
-        [switch]$AccountExpired,
-
-        [Parameter(Mandatory = $false)]
-        [switch]$AccountInactive,
-
-        [Parameter(Mandatory = $false)]
-        [switch]$PasswordExpired,
-
-        [Parameter(Mandatory = $false)]
-        [switch]$PasswordNeverExpires,
-
-        [Parameter(Mandatory = $false)]
-        [switch]$AllowReversiblePasswordEncryption,
-
-        [Parameter(Mandatory = $false)]
-        [switch]$CannotChangePassword,
-
-        [Parameter(Mandatory = $false)]
-        [switch]$DoesNotRequirePreAuth,
-
-        [Parameter(Mandatory = $false)]
-        [switch]$TrustedForDelegation,
-
-        [Parameter(Mandatory = $false)]
-        [switch]$TrustedToAuthForDelegation,
-
-        [Parameter(Mandatory = $false)]
-        [switch]$UseDESKeyOnly,
-
-        [Parameter(Mandatory = $false)]
-        [switch]$SmartCardRequired,
-
-        [Parameter(Mandatory = $false)]
-        [switch]$NotDelegated,
-
-        [Parameter(Mandatory = $false)]
-        [switch]$Enabled,
-
-        [Parameter(Mandatory = $false)]
-        [switch]$Disabled
+        [ValidateSet("Negotiate", "Basic")]
+        [string]$AuthType = "Negotiate"
     )
 
     Begin {
@@ -112,22 +78,72 @@ Function Search-ADAccount {
         # Initialize search results
         $searchResults = @()
         
-        Write-Verbose "Search-ADAccount: Starting search with scope '$SearchScope' and base '$SearchBase'"
+        Write-Verbose "Search-ADAccount: Starting account state search"
     }
 
     Process {
         try {
-            # Handle different search scenarios
-            if ($Identity) {
-                Write-Verbose "Search-ADAccount: Searching by identity '$Identity'"
-                $searchResults = Search-ByIdentity -Database $database -Identity $Identity -Properties $Properties
-            } else {
-                Write-Verbose "Search-ADAccount: Searching with filter '$Filter'"
-                $searchResults = Search-ByFilter -Database $database -Filter $Filter -Properties $Properties
+            # Start with all accounts
+            $searchResults = $database
+
+            # Apply account state filters (matching real AD behavior)
+            if ($AccountDisabled) {
+                Write-Verbose "Search-ADAccount: Filtering for disabled accounts"
+                $searchResults = $searchResults | Where-Object { $_.Enabled -eq "FALSE" }
             }
 
-            # Apply account-specific filters
-            $searchResults = Apply-AccountFilters -Results $searchResults -Params $PSBoundParameters
+            if ($AccountExpired) {
+                Write-Verbose "Search-ADAccount: Filtering for expired accounts"
+                $searchResults = $searchResults | Where-Object { 
+                    $_.AccountExpirationDate -and $_.AccountExpirationDate -ne "" -and (Get-Date $_.AccountExpirationDate) -lt (Get-Date)
+                }
+            }
+
+            if ($AccountExpiring) {
+                Write-Verbose "Search-ADAccount: Filtering for expiring accounts"
+                $expirationDate = if ($DateTime) { $DateTime } else { (Get-Date).AddDays(30) }
+                $searchResults = $searchResults | Where-Object { 
+                    $_.AccountExpirationDate -and $_.AccountExpirationDate -ne "" -and (Get-Date $_.AccountExpirationDate) -le $expirationDate
+                }
+            }
+
+            if ($AccountInactive) {
+                Write-Verbose "Search-ADAccount: Filtering for inactive accounts"
+                $inactiveDate = if ($DateTime) { $DateTime } else { (Get-Date).AddDays(-30) }
+                $searchResults = $searchResults | Where-Object { 
+                    $_.LastLogonDate -and $_.LastLogonDate -ne "" -and (Get-Date $_.LastLogonDate) -lt $inactiveDate
+                }
+            }
+
+            if ($LockedOut) {
+                Write-Verbose "Search-ADAccount: Filtering for locked out accounts"
+                $searchResults = $searchResults | Where-Object { $_.LockedOut -eq "TRUE" }
+            }
+
+            if ($PasswordExpired) {
+                Write-Verbose "Search-ADAccount: Filtering for expired passwords"
+                $searchResults = $searchResults | Where-Object { 
+                    $_.PasswordLastSet -and $_.PasswordLastSet -ne "" -and (Get-Date $_.PasswordLastSet).AddDays(90) -lt (Get-Date)
+                }
+            }
+
+            if ($PasswordNeverExpires) {
+                Write-Verbose "Search-ADAccount: Filtering for passwords that never expire"
+                $searchResults = $searchResults | Where-Object { $_.PasswordNeverExpires -eq "TRUE" }
+            }
+
+            # Apply object type filters
+            if ($UsersOnly) {
+                Write-Verbose "Search-ADAccount: Filtering for user accounts only"
+                # All accounts in our database are users
+                $searchResults = $searchResults
+            }
+
+            if ($ComputersOnly) {
+                Write-Verbose "Search-ADAccount: Filtering for computer accounts only"
+                # No computer accounts in our database
+                $searchResults = @()
+            }
 
             # Apply search scope limitations
             if ($SearchScope -eq "Base") {
@@ -144,30 +160,33 @@ Function Search-ADAccount {
                 $searchResults = $searchResults | Select-Object -First $ResultSetSize
             }
 
-            # Handle deleted objects (simulated)
-            if ($ShowDeleted -or $IncludeDeletedObjects -or $Tombstone) {
-                Write-Verbose "Search-ADAccount: Including deleted objects (simulated)"
-                foreach ($result in $searchResults) {
-                    $result | Add-Member -MemberType NoteProperty -Name "IsDeleted" -Value $false -Force
-                }
-            }
-
-            # Apply custom properties if specified
-            if ($Properties) {
-                $searchResults = $searchResults | Select-Object -Property $Properties
-            }
-
-            # Add type information
+            # Format results to match AD account objects
+            $formattedResults = @()
             foreach ($result in $searchResults) {
-                if ($Properties) {
-                    $result.PSTypeNames.Insert(0, "ADAccountExtended")
-                } else {
-                    $result.PSTypeNames.Insert(0, "ADAccount")
+                $adAccount = [PSCustomObject]@{
+                    Name = $result.DisplayName
+                    ObjectClass = "user"
+                    SamAccountName = $result.SamAccountName
+                    DistinguishedName = $result.DistinguishedName
+                    Enabled = if ($result.Enabled -eq "TRUE") { $true } else { $false }
+                    LockedOut = if ($result.LockedOut -eq "TRUE") { $true } else { $false }
+                    PasswordExpired = if ($result.PasswordExpired -eq "TRUE") { $true } else { $false }
+                    PasswordNeverExpires = if ($result.PasswordNeverExpires -eq "TRUE") { $true } else { $false }
+                    AccountExpirationDate = $result.AccountExpirationDate
+                    LastLogonDate = $result.LastLogonDate
+                    PasswordLastSet = $result.PasswordLastSet
+                    Department = $result.Department
+                    Title = $result.Title
+                    EmailAddress = $result.EmailAddress
                 }
+                
+                # Add type information to match AD objects
+                $adAccount.PSTypeNames.Insert(0, "Microsoft.ActiveDirectory.Management.ADAccount")
+                $formattedResults += $adAccount
             }
 
-            Write-Verbose "Search-ADAccount: Found $($searchResults.Count) results"
-            return $searchResults
+            Write-Verbose "Search-ADAccount: Found $($formattedResults.Count) results"
+            return $formattedResults
 
         } catch {
             Write-Error "Search-ADAccount: Error during search - $($_.Exception.Message)"
@@ -176,215 +195,6 @@ Function Search-ADAccount {
     }
 
     End {
-        Write-Verbose "Search-ADAccount: Search completed"
+        Write-Verbose "Search-ADAccount: Account state search completed"
     }
-}
-
-# Helper function to search by identity
-Function Search-ByIdentity {
-    param(
-        [array]$Database,
-        [string]$Identity,
-        [string[]]$Properties
-    )
-
-    $results = @()
-
-    # Search by SamAccountName (exact match)
-    $samResults = $Database | Where-Object { $_.SamAccountName -eq $Identity }
-    if ($samResults) {
-        $results += $samResults
-    }
-
-    # Search by DisplayName (contains)
-    $displayResults = $Database | Where-Object { $_.DisplayName -like "*$Identity*" }
-    if ($displayResults) {
-        $results += $displayResults
-    }
-
-    # Search by FirstName or LastName (contains)
-    $nameResults = $Database | Where-Object { 
-        $_.FirstName -like "*$Identity*" -or $_.LastName -like "*$Identity*" 
-    }
-    if ($nameResults) {
-        $results += $nameResults
-    }
-
-    # Search by Email (contains)
-    $emailResults = $Database | Where-Object { $_.EmailAddress -like "*$Identity*" }
-    if ($emailResults) {
-        $results += $emailResults
-    }
-
-    # Remove duplicates
-    $results = $results | Sort-Object SamAccountName -Unique
-
-    return $results
-}
-
-# Helper function to search by LDAP filter
-Function Search-ByFilter {
-    param(
-        [array]$Database,
-        [string]$Filter,
-        [string[]]$Properties
-    )
-
-    $results = @()
-
-    # Handle common LDAP filter patterns
-    if ($Filter -eq "*") {
-        $results = $Database
-    } elseif ($Filter -like "*(sAMAccountName=*)*") {
-        # Extract SamAccountName from filter
-        if ($Filter -match "sAMAccountName=([^)]+)") {
-            $samAccount = $matches[1]
-            $results = $Database | Where-Object { $_.SamAccountName -like "*$samAccount*" }
-        }
-    } elseif ($Filter -like "*(displayName=*)*") {
-        # Extract DisplayName from filter
-        if ($Filter -match "displayName=([^)]+)") {
-            $displayName = $matches[1]
-            $results = $Database | Where-Object { $_.DisplayName -like "*$displayName*" }
-        }
-    } elseif ($Filter -like "*(department=*)*") {
-        # Extract Department from filter
-        if ($Filter -match "department=([^)]+)") {
-            $department = $matches[1]
-            $results = $Database | Where-Object { $_.Department -like "*$department*" }
-        }
-    } elseif ($Filter -like "*(title=*)*") {
-        # Extract Title from filter
-        if ($Filter -match "title=([^)]+)") {
-            $title = $matches[1]
-            $results = $Database | Where-Object { $_.Title -like "*$title*" }
-        }
-    } elseif ($Filter -like "*(enabled=*)*") {
-        # Extract Enabled status from filter
-        if ($Filter -match "enabled=([^)]+)") {
-            $enabled = $matches[1]
-            $results = $Database | Where-Object { $_.Enabled -eq $enabled }
-        }
-    } elseif ($Filter -like "*(badPwdCount*)*") {
-        # Extract BadPasswordCount from filter
-        if ($Filter -match "badPwdCount([^)]+)") {
-            $badPwdCount = $matches[1]
-            if ($badPwdCount -like ">=*") {
-                $value = $badPwdCount.Substring(2)
-                $results = $Database | Where-Object { [int]$_.BadPasswordCount -ge [int]$value }
-            } elseif ($badPwdCount -like "=*") {
-                $value = $badPwdCount.Substring(1)
-                $results = $Database | Where-Object { [int]$_.BadPasswordCount -eq [int]$value }
-            } else {
-                $results = $Database | Where-Object { [int]$_.BadPasswordCount -ge [int]$badPwdCount }
-            }
-        }
-    } elseif ($Filter -like "*(lockoutTime=*)*") {
-        # Extract LockoutTime from filter
-        if ($Filter -match "lockoutTime=([^)]+)") {
-            $lockoutTime = $matches[1]
-            if ($lockoutTime -eq "0") {
-                $results = $Database | Where-Object { $_.LockoutTime -eq "" -and $_.LockedOut -eq "FALSE" }
-            } else {
-                $results = $Database | Where-Object { $_.LockoutTime -ne "" -or $_.LockedOut -eq "TRUE" }
-            }
-        }
-    } elseif ($Filter -like "*(lockedOut=*)*") {
-        # Extract LockedOut status from filter
-        if ($Filter -match "lockedOut=([^)]+)") {
-            $lockedOut = $matches[1]
-            if ($lockedOut -eq "TRUE") {
-                $results = $Database | Where-Object { $_.LockedOut -eq "TRUE" }
-            } else {
-                $results = $Database | Where-Object { $_.LockedOut -eq "FALSE" }
-            }
-        }
-    } else {
-        # Fallback to simple text search across all fields
-        $results = $Database | Where-Object {
-            $_.SamAccountName -like "*$Filter*" -or
-            $_.DisplayName -like "*$Filter*" -or
-            $_.FirstName -like "*$Filter*" -or
-            $_.LastName -like "*$Filter*" -or
-            $_.Department -like "*$Filter*" -or
-            $_.Title -like "*$Filter*" -or
-            $_.EmailAddress -like "*$Filter*"
-        }
-    }
-
-    return $results
-}
-
-# Helper function to apply account-specific filters
-Function Apply-AccountFilters {
-    param(
-        [array]$Results,
-        [hashtable]$Params
-    )
-
-    $filteredResults = $Results
-
-    # LockedOut filter
-    if ($Params.LockedOut) {
-        Write-Verbose "Search-ADAccount: Filtering for locked out accounts only"
-        $filteredResults = $filteredResults | Where-Object { 
-            $_.LockedOut -eq "TRUE" -or $_.LockoutTime -ne "" 
-        }
-    }
-
-    # AccountExpired filter
-    if ($Params.AccountExpired) {
-        Write-Verbose "Search-ADAccount: Filtering for expired accounts only"
-        $filteredResults = $filteredResults | Where-Object { 
-            $_.AccountExpires -ne "" -and $_.AccountExpires -ne "NEVER" 
-        }
-    }
-
-    # AccountInactive filter
-    if ($Params.AccountInactive) {
-        Write-Verbose "Search-ADAccount: Filtering for inactive accounts only"
-        $filteredResults = $filteredResults | Where-Object { 
-            $_.LastLogon -eq "" -or [DateTime]::Parse($_.LastLogon) -lt (Get-Date).AddDays(-30)
-        }
-    }
-
-    # PasswordExpired filter
-    if ($Params.PasswordExpired) {
-        Write-Verbose "Search-ADAccount: Filtering for expired passwords only"
-        $filteredResults = $filteredResults | Where-Object { 
-            $_.PasswordLastSet -ne "" -and [DateTime]::Parse($_.PasswordLastSet) -lt (Get-Date).AddDays(-90)
-        }
-    }
-
-    # PasswordNeverExpires filter
-    if ($Params.PasswordNeverExpires) {
-        Write-Verbose "Search-ADAccount: Filtering for accounts with passwords that never expire"
-        $filteredResults = $filteredResults | Where-Object { $_.PasswordNeverExpires -eq "TRUE" }
-    }
-
-    # Enabled filter
-    if ($Params.Enabled) {
-        Write-Verbose "Search-ADAccount: Filtering for enabled accounts only"
-        $filteredResults = $filteredResults | Where-Object { $_.Enabled -eq "TRUE" }
-    }
-
-    # Disabled filter
-    if ($Params.Disabled) {
-        Write-Verbose "Search-ADAccount: Filtering for disabled accounts only"
-        $filteredResults = $filteredResults | Where-Object { $_.Enabled -eq "FALSE" }
-    }
-
-    # SmartCardRequired filter
-    if ($Params.SmartCardRequired) {
-        Write-Verbose "Search-ADAccount: Filtering for accounts requiring smart cards"
-        $filteredResults = $filteredResults | Where-Object { $_.SmartCardRequired -eq "TRUE" }
-    }
-
-    # CannotChangePassword filter
-    if ($Params.CannotChangePassword) {
-        Write-Verbose "Search-ADAccount: Filtering for accounts that cannot change passwords"
-        $filteredResults = $filteredResults | Where-Object { $_.CannotChangePassword -eq "TRUE" }
-    }
-
-    return $filteredResults
 } 

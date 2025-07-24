@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the enhanced Indicators of Compromise (IoCs) implemented in the `Get-ADSecurityReport-Enterprise.ps1` script. These patterns are designed to detect various types of security threats and suspicious activities in Active Directory environments.
+This document outlines the enhanced Indicators of Compromise (IoCs) implemented in the `Get-SecurityReport.ps1` script. These patterns are designed to detect various types of security threats and suspicious activities in Active Directory environments.
 
 ## IoC Categories
 
@@ -163,17 +163,17 @@ if ($User.SamAccountName -like "*svc*" -and $User.Enabled -eq "TRUE") {
 
 ### Enterprise IoC Detection (CSV Export)
 ```powershell
-.\Scripts\Get-ADSecurityReport-Enterprise.ps1 -EnhancedIoCDetection
+.\Scripts\Get-SecurityReport.ps1 -EnhancedIoCDetection
 ```
 
 ### Detailed IoC Report
 ```powershell
-.\Scripts\Get-ADSecurityReport-Enterprise.ps1 -EnhancedIoCDetection -DetailedReport
+.\Scripts\Get-SecurityReport.ps1 -EnhancedIoCDetection -DetailedReport
 ```
 
 ### Custom IoC Parameters
 ```powershell
-.\Scripts\Get-ADSecurityReport-Enterprise.ps1 -EnhancedIoCDetection -InactiveDays 60 -PasswordAgeDays 45
+.\Scripts\Get-SecurityReport.ps1 -EnhancedIoCDetection -InactiveDays 60 -PasswordAgeDays 45
 ```
 
 ### Individual User IoC Analysis (HTML Export)

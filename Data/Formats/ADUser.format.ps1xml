@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Configuration>
   <ViewDefinitions>
-    <!-- Default Table View (4 core properties) -->
+    <!-- Default Table View (5 core properties matching Microsoft Get-ADUser) -->
     <View>
       <Name>ADUser</Name>
       <ViewSelectedBy>
@@ -20,14 +20,19 @@
             <Alignment>Left</Alignment>
           </TableColumnHeader>
           <TableColumnHeader>
-            <Label>FirstName</Label>
+            <Label>GivenName</Label>
             <Width>12</Width>
             <Alignment>Left</Alignment>
           </TableColumnHeader>
           <TableColumnHeader>
-            <Label>LastName</Label>
+            <Label>Surname</Label>
             <Width>12</Width>
             <Alignment>Left</Alignment>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Enabled</Label>
+            <Width>8</Width>
+            <Alignment>Center</Alignment>
           </TableColumnHeader>
         </TableHeaders>
         <TableRowEntries>
@@ -45,13 +50,17 @@
               <TableColumnItem>
                 <PropertyName>LastName</PropertyName>
               </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>Enabled</PropertyName>
+                <FormatString>{0}</FormatString>
+              </TableColumnItem>
             </TableColumnItems>
           </TableRowEntry>
         </TableRowEntries>
       </TableControl>
     </View>
     
-    <!-- Extended Table View (6 most important properties) -->
+    <!-- Extended Table View (all properties when using -Properties *) -->
     <View>
       <Name>ADUserExtended</Name>
       <ViewSelectedBy>
@@ -89,6 +98,16 @@
             <Width>8</Width>
             <Alignment>Center</Alignment>
           </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>LastLogon</Label>
+            <Width>15</Width>
+            <Alignment>Left</Alignment>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>LogonCount</Label>
+            <Width>10</Width>
+            <Alignment>Center</Alignment>
+          </TableColumnHeader>
         </TableHeaders>
         <TableRowEntries>
           <TableRowEntry>
@@ -112,13 +131,19 @@
                 <PropertyName>Enabled</PropertyName>
                 <FormatString>{0}</FormatString>
               </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>LastLogonDate</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>LogonCount</PropertyName>
+              </TableColumnItem>
             </TableColumnItems>
           </TableRowEntry>
         </TableRowEntries>
       </TableControl>
     </View>
     
-    <!-- Default List View (4 core properties) -->
+    <!-- Default List View (Format-List behavior) -->
     <View>
       <Name>ADUserDetailed</Name>
       <ViewSelectedBy>
@@ -137,12 +162,16 @@
                 <PropertyName>SamAccountName</PropertyName>
               </ListItem>
               <ListItem>
-                <Label>FirstName</Label>
+                <Label>GivenName</Label>
                 <PropertyName>FirstName</PropertyName>
               </ListItem>
               <ListItem>
-                <Label>LastName</Label>
+                <Label>Surname</Label>
                 <PropertyName>LastName</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Enabled</Label>
+                <PropertyName>Enabled</PropertyName>
               </ListItem>
             </ListItems>
           </ListEntry>
@@ -150,7 +179,7 @@
       </ListControl>
     </View>
     
-    <!-- Extended List View (all properties) -->
+    <!-- Extended List View (all properties when using -Properties * with Format-List) -->
     <View>
       <Name>ADUserExtendedList</Name>
       <ViewSelectedBy>
@@ -167,6 +196,14 @@
               <ListItem>
                 <Label>SamAccountName</Label>
                 <PropertyName>SamAccountName</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>GivenName</Label>
+                <PropertyName>FirstName</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Surname</Label>
+                <PropertyName>LastName</PropertyName>
               </ListItem>
               <ListItem>
                 <Label>EmailAddress</Label>
@@ -210,7 +247,7 @@
               </ListItem>
               <ListItem>
                 <Label>LastLogon</Label>
-                <PropertyName>LastLogon</PropertyName>
+                <PropertyName>LastLogonDate</PropertyName>
               </ListItem>
               <ListItem>
                 <Label>LogonCount</Label>
@@ -220,13 +257,69 @@
                 <Label>BadPasswordCount</Label>
                 <PropertyName>BadPasswordCount</PropertyName>
               </ListItem>
+              <ListItem>
+                <Label>PasswordLastSet</Label>
+                <PropertyName>PasswordLastSet</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>AccountExpirationDate</Label>
+                <PropertyName>AccountExpirationDate</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>LockoutTime</Label>
+                <PropertyName>LockoutTime</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>LockedOut</Label>
+                <PropertyName>LockedOut</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>PasswordNeverExpires</Label>
+                <PropertyName>PasswordNeverExpires</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>CannotChangePassword</Label>
+                <PropertyName>CannotChangePassword</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>SmartCardRequired</Label>
+                <PropertyName>SmartCardRequired</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Manager</Label>
+                <PropertyName>Manager</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Office</Label>
+                <PropertyName>Office</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>PhoneNumber</Label>
+                <PropertyName>PhoneNumber</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Mobile</Label>
+                <PropertyName>Mobile</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>Company</Label>
+                <PropertyName>Company</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>SID</Label>
+                <PropertyName>SID</PropertyName>
+              </ListItem>
+              <ListItem>
+                <Label>PrimaryGroupID</Label>
+                <PropertyName>PrimaryGroupID</PropertyName>
+              </ListItem>
             </ListItems>
           </ListEntry>
         </ListEntries>
       </ListControl>
     </View>
     
-    <!-- Wide View -->
+    <!-- Wide View (Format-Wide behavior) -->
     <View>
       <Name>ADUserWide</Name>
       <ViewSelectedBy>

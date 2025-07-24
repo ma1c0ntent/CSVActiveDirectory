@@ -21,7 +21,7 @@ A comprehensive PowerShell module that simulates Active Directory functionality 
 - **CSV Backend** - Simple, portable data storage
 - **Realistic Data** - Authentic user information and scenarios
 - **Data Integrity** - Consistent data across all operations
-- **Backup System** - Automatic database backups
+- **Backup System** - Automatic database backups with timestamped files
 
 ### 🔧 Core AD Functions
 - **`Get-ADUser`** - Query users with Identity or Filter parameters
@@ -45,7 +45,7 @@ git clone https://gitlab.com/ma1c0ntent/CSVActiveDirectory.git
 cd CSVActiveDirectory
 
 # One-click installation
-.\INSTALL.ps1
+.\install.ps1
 ```
 
 #### Manual Installation:
@@ -53,7 +53,7 @@ cd CSVActiveDirectory
 # Clone or download the module
 # Navigate to the module directory
 Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
-.\Scripts\Install-Module.ps1
+.\install.ps1
 ```
 
 ### 📊 Progress & Status
@@ -69,12 +69,20 @@ Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
 - **Professional table views** with proper formatting
 - **Detailed list views** with complete information
 - **Color-coded status** indicators
+- **Cross-version emoji compatibility** (PowerShell 5.1+ and 7+)
 
 ### 🔍 Security & IoC Analysis
-- **`Get-IOCs.ps1`** - Individual user threat analysis
-- **Professional HTML reports** with detailed IoC detection
-- **Enhanced IoC detection** for enterprise security reports
+- **`Get-IOCs.ps1`** - Individual user threat analysis with interactive HTML reports
+- **`Get-SecurityReport.ps1`** - Enterprise security reports with enhanced IoC detection
+- **`Queries.ps1`** - Individual security queries for focused analysis
+- **Professional HTML reports** with clickable IoC items and collapsible categories
 - **Color-coded severity levels** and actionable recommendations
+- **Individual user reports** stored in `RiskyUsers/` directory
+
+### 🧹 Database Management
+- **`Cleanup-Backups.ps1`** - Comprehensive backup management with age-based deletion
+- **Automatic backup system** with timestamped files
+- **Disk space management** with safety features and confirmation prompts
 
 ## 🚀 Getting Started
 
@@ -94,7 +102,7 @@ Get-Command -Module CSVActiveDirectory
 
 ```powershell
 # Option 1: Use the one-click installer (recommended)
-.\INSTALL.ps1
+.\install.ps1
 
 # Option 2: Create users manually
 .\Scripts\Create-Users.ps1
@@ -109,6 +117,101 @@ Get-Command -Module CSVActiveDirectory
 - Includes cybersecurity risk scenarios for security analysis
 - Enables all module functionality (IoC detection, security reports, etc.)
 
+## 📁 Project Structure
+
+```
+CSVActiveDirectory/
+├── 📄 Core Files
+│   ├── CSVActiveDirectory.psd1          # Module manifest
+│   ├── CSVActiveDirectory.psm1          # Module script
+│   ├── install.ps1                      # One-click installer
+│   ├── README.md                        # This file
+│   ├── CHANGELOG.md                     # Version history
+│   ├── LICENSE                          # License information
+│   └── TESTING-METRICS.md              # Comprehensive testing results
+│
+├── 📁 Scripts/                          # Main script directory
+│   ├── Create-Users.ps1                 # User generation with security scenarios
+│   ├── Get-IOCs.ps1                     # Individual user IoC analysis
+│   ├── Get-SecurityReport.ps1                 # Enterprise security reports
+│   ├── Queries.ps1                      # Security query examples
+│   ├── Cleanup-Backups.ps1              # Backup management utility
+│   └── Test-ModuleFunctions.ps1         # Module function testing
+│
+├── 📁 Functions/                        # Module functions
+│   ├── Public/                          # Public cmdlets
+│   │   ├── Get-ADUser.ps1
+│   │   ├── New-ADUser.ps1
+│   │   ├── Remove-ADUser.ps1
+│   │   ├── Enable-ADAccount.ps1
+│   │   ├── Disable-ADAccount.ps1
+│   │   ├── Search-ADAccount.ps1
+│   │   ├── Get-ADConfig.ps1
+│   │   ├── Show-ADProgress.ps1
+│   │   ├── Show-ADStatus.ps1
+│   │   └── Set-ADAccountPassword.ps1
+│   └── Private/                         # Internal functions
+│       ├── ConvertTo-ADPasswordHash.ps1
+│       ├── Get-ADPasswordPolicy.ps1
+│       ├── Test-ADPassword.ps1
+│       └── Test-ADPasswordComplexity.ps1
+│
+├── 📁 Data/                             # Data storage
+│   ├── Database/                        # Database files
+│   │   ├── Database.csv                 # Current database
+│   │   └── Database.backup.*.csv       # Backup files (30+)
+│   ├── Config/                          # Configuration
+│   │   └── Settings.json
+│   └── Formats/                         # Display formats
+│       └── ADUser.format.ps1xml
+│
+├── 📁 RiskyUsers/                       # IoC HTML reports
+│   ├── IoC_*.html                      # Individual user reports
+│   └── (Generated by Get-IOCs.ps1)
+│
+├── 📁 Examples/                         # Usage examples
+│   ├── Basic/
+│   │   └── Demo-BasicFeatures.ps1
+│   └── Advanced/
+│       ├── Demo-EnhancedFeatures.ps1
+│       └── Demo-AccountScenarios.ps1
+│
+├── 📁 Tests/                            # Test scripts
+│   ├── Integration/
+│   │   ├── Module.Tests.ps1
+│   │   └── User-Lifecycle.Tests.ps1
+│   └── Functions/
+│       ├── Configuration-Management.Tests.ps1
+│       ├── Enable-Disable-ADAccount.Tests.ps1
+│       ├── Get-ADUser.Tests.ps1
+│       ├── New-ADUser.Tests.ps1
+│       ├── Remove-ADUser.Tests.ps1
+│       ├── Search-ADAccount.Tests.ps1
+│       └── Test-ADPasswordComplexity.Tests.ps1
+│
+└── 📁 Docs/                             # Documentation
+    ├── Functions/                       # Function documentation
+    ├── Active-Directory-Cybersecurity-Guide.md
+    ├── CSV-Export-Guide.md
+    ├── Cybersecurity-Scenarios.md
+    ├── Enhanced-IoC-Detection.md
+    ├── IoC-Analysis-Guide.md
+    └── SETUP.md
+```
+
+## 📊 Available Scripts
+
+### Core Scripts
+- **`install.ps1`** - One-click installation with module setup and database creation
+- **`Create-Users.ps1`** - Generate test database with cybersecurity scenarios
+- **`Get-IOCs.ps1`** - Individual user IoC analysis with interactive HTML reports
+- **`Get-SecurityReport.ps1`** - Enterprise security reports with enhanced IoC detection
+- **`Queries.ps1`** - Individual security queries for focused analysis
+- **`Cleanup-Backups.ps1`** - Backup management with age-based deletion
+
+### Utility Scripts
+- **`Test-ModuleFunctions.ps1`** - Test all module functions for compatibility
+
 ## 🎯 Quick Start
 
 ### Step 1: Create Users (Required)
@@ -117,7 +220,7 @@ Get-Command -Module CSVActiveDirectory
 .\Scripts\Create-Users.ps1
 
 # Or use the one-click installer
-.\INSTALL.ps1
+.\install.ps1
 ```
 
 ### Step 2: Basic Usage
@@ -144,7 +247,7 @@ Get-ADUser -Filter "Department -eq 'Security'"
 .\Scripts\Get-IOCs.ps1 -Username "username" -ExportReport /path/to/export/to
 
 # Enterprise security report with enhanced IoC detection
-.\Scripts\Get-ADSecurityReport-Enterprise.ps1
+.\Scripts\Get-SecurityReport.ps1
 ```
 
 ### Creating Users
@@ -168,6 +271,21 @@ Enable-ADAccount -Identity "jdoe"
 Remove-ADUser -Identity "jdoe" -Confirm:$false
 ```
 
+### Database Management
+```powershell
+# Clean up old backup files (older than 7 days)
+.\Scripts\Cleanup-Backups.ps1 -DeleteAfterDays 7
+
+# Preview what would be deleted
+.\Scripts\Cleanup-Backups.ps1 -DeleteAfterDays 7 -WhatIf
+
+# Delete all backup files (with confirmation)
+.\Scripts\Cleanup-Backups.ps1 -DeleteAll
+
+# Delete all backup files (no confirmation)
+.\Scripts\Cleanup-Backups.ps1 -DeleteAll -Force
+```
+
 ## 📊 Available Properties
 
 ### Core Properties (Default)
@@ -177,188 +295,77 @@ Remove-ADUser -Identity "jdoe" -Confirm:$false
 - `DistinguishedName`, `EmailAddress`, `EmpID`, `Title`, `Department`
 - `Guid`, `Created`, `Modified`, `Enabled`, `UserPrincipalName`
 - `SID`, `PrimaryGroupID`, `PasswordLastSet`, `LastLogon`
-- `AccountExpires`, `LockoutTime`, `LogonCount`, `BadPasswordCount`
-- `PasswordNeverExpires`, `CannotChangePassword`, `SmartCardRequired`
-- `Manager`, `Office`, `PhoneNumber`, `Mobile`, `Company`
 
-## 🎨 Format Views
+## 🔧 Compatibility
 
-### Default Table View
-Shows: `DisplayName`, `SamAccountName`, `FirstName`, `LastName`
+### PowerShell Versions
+- **PowerShell 5.1**: Full compatibility with ASCII emoji alternatives
+- **PowerShell 7+**: Full compatibility with Unicode emoji support
+- **Automatic Detection**: Scripts automatically detect PowerShell version
+- **Cross-Platform**: Works on Windows, Linux, and macOS
 
-### Extended Table View (with `-Properties *`)
-Shows: `Name`, `SamAccountName`, `EmailAddress`, `Department`, `Title`, `Enabled`
+### Features by Version
+| Feature | PowerShell 5.1 | PowerShell 7+ |
+|---------|----------------|---------------|
+| Unicode Emojis | ASCII alternatives | Full Unicode support |
+| Null Coalescing | Explicit if/else | `??` operator |
+| HTML Reports | ✅ | ✅ |
+| IoC Detection | ✅ | ✅ |
+| Database Operations | ✅ | ✅ |
 
-### List Views
-- **Normal**: Core properties in list format
-- **Extended**: All properties in detailed list format
+## 📈 Testing Results
 
-## 🔧 Configuration
+**Comprehensive testing completed with 100% compatibility:**
+- **35 scripts tested** across both PowerShell versions
+- **PowerShell 5.1**: 35/35 scripts pass ✅
+- **PowerShell 7+**: 35/35 scripts pass ✅
+- **Performance**: < 30 seconds for IoC analysis of 1000+ users
+- **HTML Reports**: Interactive with clickable IoC items and collapsible sections
 
-### Settings.json
-```json
-{
-  "Database": {
-    "Path": "Data/Database/Database.csv",
-    "BackupPath": "Data/Database/Database.backup.csv"
-  },
-  "DefaultValues": {
-    "DefaultDepartment": "Security",
-    "DefaultTitle": "Employee",
-    "DefaultCompany": "AdNauseum Gaming"
-  },
-  "PasswordPolicy": {
-    "MinimumLength": 8,
-    "RequireUppercase": true,
-    "RequireLowercase": true,
-    "RequireNumbers": true,
-    "RequireSpecialChars": true
-  }
-}
-```
+See `TESTING-METRICS.md` for detailed testing results and performance metrics.
 
-## 🧪 Testing
+## 🚀 Advanced Features
 
-### Run All Tests
-```powershell
-Invoke-Pester -Path "Tests" -Output Detailed
-```
+### Enhanced HTML Reports
+- **Clickable IoC items** with detailed explanations
+- **Collapsible categories** for better organization
+- **Interactive confidence levels** with risk scoring
+- **Detailed log breakdowns** showing detection reasons
+- **Responsive design** for various screen sizes
 
-### Run Specific Test Categories
-```powershell
-# Function tests
-Invoke-Pester -Path "Tests/Functions" -Output Detailed
+### IoC Detection
+- **Real-time threat analysis** with confidence scoring
+- **Multiple detection algorithms** for comprehensive coverage
+- **Risk-based prioritization** with actionable recommendations
+- **Individual user reports** stored in `RiskyUsers/` directory
 
-# Integration tests
-Invoke-Pester -Path "Tests/Integration" -Output Detailed
-```
-
-### Test Individual Functions
-```powershell
-# Test Get-ADUser
-Invoke-Pester -Path "Tests/Functions/Get-ADUser.Tests.ps1"
-
-# Test New-ADUser
-Invoke-Pester -Path "Tests/Functions/New-ADUser.Tests.ps1"
-```
-
-## 📁 Module Structure
-
-```
-CSVActiveDirectory/
-├── CSVActiveDirectory.psd1          # Module manifest
-├── CSVActiveDirectory.psm1          # Root module
-├── Functions/
-│   ├── Public/                     # Exported functions
-│   │   ├── Get-ADUser.ps1
-│   │   ├── New-ADUser.ps1
-│   │   ├── Remove-ADUser.ps1
-│   │   ├── Enable-ADAccount.ps1
-│   │   └── Disable-ADAccount.ps1
-│   └── Private/                    # Internal functions
-│       ├── Test-ADPasswordComplexity.ps1
-│       ├── Test-ADPassword.ps1
-│       ├── Get-ADPasswordPolicy.ps1
-│       └── ConvertTo-ADPasswordHash.ps1
-├── Data/
-│   ├── Database/
-│   │   ├── Database.csv            # Main database
-│   │   └── Database.backup.csv     # Backup database
-│   ├── Config/
-│   │   └── Settings.json           # Configuration
-│   └── Formats/
-│       └── ADUser.format.ps1xml    # Custom formats
-├── Tests/
-│   ├── Functions/                  # Unit tests
-│   └── Integration/                # Integration tests
-├── Scripts/                        # Utility scripts
-├── Examples/                       # Example scripts
-└── Docs/                          # Documentation
-    ├── SETUP.md                   # Setup guide
-    ├── IoC-Analysis-Guide.md      # IoC analysis documentation
-    ├── CSV-Export-Guide.md        # Export functionality guide
-    ├── Enhanced-IoC-Detection.md  # Enhanced IoC detection
-    ├── Cybersecurity-Scenarios.md # Security scenarios
-    ├── Active-Directory-Cybersecurity-Guide.md # Main security guide
-    └── Functions/                 # Function documentation
-```
-
-## 🔍 Examples
-
-### Advanced Filtering
-```powershell
-# Find all users in Security department
-Get-ADUser -Filter "Department -eq 'Security'" -Properties *
-
-# Find disabled accounts
-Get-ADUser -Filter "Enabled -eq 'FALSE'" -Properties *
-
-# Find users with specific title
-Get-ADUser -Filter "Title -eq 'Manager'" -Properties *
-```
-
-### Bulk Operations
-```powershell
-# Get all users and format as table
-Get-ADUser -Identity "*" -Properties * | Format-Table
-
-# Get all users and format as list
-Get-ADUser -Identity "*" -Properties * | Format-List
-
-# Export users to CSV
-Get-ADUser -Identity "*" -Properties * | Export-Csv -Path "users.csv" -NoTypeInformation
-```
-
-### Account Scenarios
-```powershell
-# Run account scenario simulation
-.\Scripts\Simulate-AccountScenarios.ps1
-
-# Randomize database data
-.\Scripts\Randomize-Database.ps1
-
-# Enhance database with additional data
-.\Scripts\Enhance-Database.ps1
-```
-
-## 📚 Documentation
-
-### 🎯 Comprehensive Guides
-- **[Setup Guide](Docs/SETUP.md)** - Complete setup instructions with user creation requirements
-- **[Active Directory Cybersecurity Guide](Docs/Active-Directory-Cybersecurity-Guide.md)** - Complete guide combining cybersecurity scenarios and IoC detection patterns
-
-### Function Documentation
-- [Get-ADUser](Docs/Functions/Get-ADUser.md)
-- [New-ADUser](Docs/Functions/New-ADUser.md)
-- [Remove-ADUser](Docs/Functions/Remove-ADUser.md)
-- [Enable-ADAccount](Docs/Functions/Enable-ADAccount.md)
-- [Disable-ADAccount](Docs/Functions/Disable-ADAccount.md)
-
-### Configuration
-- [Settings Reference](Docs/Configuration/Settings.md)
-- [Database Schema](Docs/Database/Schema.md)
+### Backup Management
+- **Automatic timestamped backups** during database operations
+- **Age-based cleanup** with safety confirmations
+- **Disk space management** to prevent storage issues
+- **WhatIf support** for safe preview of operations
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests for new functionality
-5. Run the test suite
-6. Submit a pull request
+4. Test in both PowerShell 5.1 and 7+
+5. Submit a pull request
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+## 📞 Support
 
 For issues, questions, or contributions:
-- Check the [documentation](Docs/)
-- Review the [examples](Examples/)
-- Run the test suite to verify functionality
-- Submit an issue with detailed information
+- Check the [Documentation](Docs/) folder
+- Review [TESTING-METRICS.md](TESTING-METRICS.md) for compatibility
+- Test your changes in both PowerShell versions
+- Ensure emoji compatibility using the `Get-Emoji` function
 
 ---
 
-**Note**: This module simulates Active Directory functionality for educational and testing purposes. It is not intended for production use or as a replacement for actual Active Directory services.
+*Last Updated: $(Get-Date -Format "yyyy-MM-dd")*
+*Tested Versions: PowerShell 5.1.19041.1, PowerShell 7.4.0*

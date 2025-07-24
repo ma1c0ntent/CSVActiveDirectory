@@ -11,10 +11,10 @@ param(
     [switch]$Detailed = $true,
     
     [Parameter(Mandatory=$false)]
-    [switch]$ExportReport = $false,
+    [switch]$ExportReport = $true,
     
     [Parameter(Mandatory=$false)]
-    [string]$ExportPath = "$env:USERPROFILE\Documents\IoCReports"
+    [string]$ExportPath = "RiskyUsers"
 )
 
 # Import required modules
@@ -25,6 +25,22 @@ catch {
     Write-Warning "Active Directory module not available. Using CSV simulation module."
     Import-Module .\CSVActiveDirectory.psd1 -Force
 }
+
+# Initialize emoji variables for compatibility
+$SearchEmoji = Get-Emoji -Type "Search"
+$TargetEmoji = Get-Emoji -Type "Target"
+$LightningEmoji = Get-Emoji -Type "Lightning"
+$ChartEmoji = Get-Emoji -Type "Target"
+$FolderEmoji = Get-Emoji -Type "Search"
+$BulletEmoji = Get-Emoji -Type "Bullet"
+$UserEmoji = Get-Emoji -Type "User"
+$AlertEmoji = Get-Emoji -Type "Alert"
+$MagnifyEmoji = Get-Emoji -Type "Magnify"
+$GearEmoji = Get-Emoji -Type "Gear"
+$ShieldEmoji = Get-Emoji -Type "Shield"
+$ArrowRightEmoji = Get-Emoji -Type "ArrowRight"
+
+
 
 # Function to get user data
 function Get-UserData {
@@ -82,7 +98,7 @@ function Analyze-IoCPatterns {
                 $DaysSincePasswordSet = (Get-Date) - $PasswordSetDate
                 if ($DaysSincePasswordSet.Days -le 7) {
                     $PrivilegeEscalation.Indicators += "Recent password change ($($DaysSincePasswordSet.Days) days ago)"
-                    $PrivilegeEscalation.Confidence += 10
+                    $PrivilegeEscalation.Confidence = [math]::Min(100, $PrivilegeEscalation.Confidence + 10)
                 }
             }
             catch { }
@@ -91,7 +107,7 @@ function Analyze-IoCPatterns {
         # Check for failed password attempts
         if ($User.BadPasswordCount -ge 3) {
             $PrivilegeEscalation.Indicators += "High failed password attempts ($($User.BadPasswordCount))"
-            $PrivilegeEscalation.Confidence += 15
+            $PrivilegeEscalation.Confidence = [math]::Min(100, $PrivilegeEscalation.Confidence + 15)
         }
         
         $IoCAnalysis.IoCDetections += $PrivilegeEscalation
@@ -116,7 +132,7 @@ function Analyze-IoCPatterns {
                 $DaysSinceLogon = (Get-Date) - $LastLogonDate
                 if ($DaysSinceLogon.Days -le 1) {
                     $CredentialDumping.Indicators += "Recent successful logon after failed attempts"
-                    $CredentialDumping.Confidence += 10
+                    $CredentialDumping.Confidence = [math]::Min(100, $CredentialDumping.Confidence + 10)
                 }
             }
             catch { }
@@ -144,7 +160,7 @@ function Analyze-IoCPatterns {
                 $DaysSinceLogon = (Get-Date) - $LastLogonDate
                 if ($DaysSinceLogon.Days -le 7) {
                     $LateralMovement.Indicators += "Recent high-activity logon ($($DaysSinceLogon.Days) days ago)"
-                    $LateralMovement.Confidence += 10
+                    $LateralMovement.Confidence = [math]::Min(100, $LateralMovement.Confidence + 10)
                 }
             }
             catch { }
@@ -216,7 +232,7 @@ function Analyze-IoCPatterns {
                 $LogonHour = $LastLogonDate.Hour
                 if ($LogonHour -ge 18 -or $LogonHour -le 6) {
                     $ServiceAccountAbuse.Indicators += "Off-hours activity ($LogonHour:00)"
-                    $ServiceAccountAbuse.Confidence += 15
+                    $ServiceAccountAbuse.Confidence = [math]::Min(100, $ServiceAccountAbuse.Confidence + 15)
                 }
             }
             catch { }
@@ -246,7 +262,7 @@ function Analyze-IoCPatterns {
                 foreach ($Pattern in $SuspiciousPatterns) {
                     if ($User.SamAccountName -like "*$Pattern*") {
                         $Reconnaissance.Indicators += "Suspicious naming pattern: $Pattern"
-                        $Reconnaissance.Confidence += 10
+                        $Reconnaissance.Confidence = [math]::Min(100, $Reconnaissance.Confidence + 10)
                         break
                     }
                 }
@@ -279,14 +295,61 @@ function Analyze-IoCPatterns {
     
     if ($CriticalCount -gt 0) {
         $IoCAnalysis.Severity = "CRITICAL"
-        $IoCAnalysis.Confidence = [math]::Min(100, ($IoCAnalysis.IoCDetections | Where-Object { $_.Severity -eq "CRITICAL" } | Measure-Object -Property Confidence -Average).Average)
+        $CriticalDetections = $IoCAnalysis.IoCDetections | Where-Object { $_.Severity -eq "CRITICAL" }
+        if ($CriticalDetections.Count -gt 0) {
+            $ConfidenceValues = @()
+            foreach ($Detection in $CriticalDetections) {
+                if ($Detection.ContainsKey('Confidence')) {
+                    $ConfidenceValues += $Detection.Confidence
+                }
+            }
+            if ($ConfidenceValues.Count -gt 0) {
+                $AverageConfidence = ($ConfidenceValues | Measure-Object -Average).Average
+                $IoCAnalysis.Confidence = [math]::Min(100, $AverageConfidence)
+            } else {
+                $IoCAnalysis.Confidence = 0
+            }
+        } else {
+            $IoCAnalysis.Confidence = 0
+        }
     }
     elseif ($HighCount -gt 0) {
         $IoCAnalysis.Severity = "HIGH"
-        $IoCAnalysis.Confidence = [math]::Min(100, ($IoCAnalysis.IoCDetections | Where-Object { $_.Severity -eq "HIGH" } | Measure-Object -Property Confidence -Average).Average)
+        $HighDetections = $IoCAnalysis.IoCDetections | Where-Object { $_.Severity -eq "HIGH" }
+        if ($HighDetections.Count -gt 0) {
+            $ConfidenceValues = @()
+            foreach ($Detection in $HighDetections) {
+                if ($Detection.ContainsKey('Confidence')) {
+                    $ConfidenceValues += $Detection.Confidence
+                }
+            }
+            if ($ConfidenceValues.Count -gt 0) {
+                $AverageConfidence = ($ConfidenceValues | Measure-Object -Average).Average
+                $IoCAnalysis.Confidence = [math]::Min(100, $AverageConfidence)
+            } else {
+                $IoCAnalysis.Confidence = 0
+            }
+        } else {
+            $IoCAnalysis.Confidence = 0
+        }
     }
     else {
-        $IoCAnalysis.Confidence = [math]::Min(100, ($IoCAnalysis.IoCDetections | Measure-Object -Property Confidence -Average).Average)
+        if ($IoCAnalysis.IoCDetections.Count -gt 0) {
+            $ConfidenceValues = @()
+            foreach ($Detection in $IoCAnalysis.IoCDetections) {
+                if ($Detection.ContainsKey('Confidence')) {
+                    $ConfidenceValues += $Detection.Confidence
+                }
+            }
+            if ($ConfidenceValues.Count -gt 0) {
+                $AverageConfidence = ($ConfidenceValues | Measure-Object -Average).Average
+                $IoCAnalysis.Confidence = [math]::Min(100, $AverageConfidence)
+            } else {
+                $IoCAnalysis.Confidence = 0
+            }
+        } else {
+            $IoCAnalysis.Confidence = 0
+        }
     }
     
     # Generate recommended responses
@@ -315,7 +378,7 @@ function Analyze-IoCPatterns {
 function Show-IoCReport {
     param([hashtable]$Analysis)
     
-    Write-Host "=== IoC ANALYSIS REPORT ===" -ForegroundColor Cyan
+    Write-Host "=== IoC ANALYSIS REPORT ===" -ForegroundColor White
     Write-Host "User: $($Analysis.UserInfo.SamAccountName)" -ForegroundColor White
     Write-Host "Display Name: $($Analysis.UserInfo.DisplayName)" -ForegroundColor White
     Write-Host "Department: $($Analysis.UserInfo.Department)" -ForegroundColor White
@@ -328,10 +391,10 @@ function Show-IoCReport {
         "CRITICAL" { "Red" }
         "HIGH" { "Yellow" }
         "MEDIUM" { "Magenta" }
-        "LOW" { "Blue" }
+        "LOW" { "DarkCyan" }
     }
     
-    Write-Host "=== OVERALL ASSESSMENT ===" -ForegroundColor Cyan
+    Write-Host "=== OVERALL ASSESSMENT ===" -ForegroundColor White
     Write-Host "Severity: $($Analysis.Severity)" -ForegroundColor $SeverityColor
     Write-Host "Confidence: $($Analysis.Confidence)%" -ForegroundColor White
     Write-Host "Attack Patterns: $($Analysis.AttackPatterns -join ', ')" -ForegroundColor White
@@ -339,13 +402,13 @@ function Show-IoCReport {
     
     # IoC Detections
     if ($Analysis.IoCDetections.Count -gt 0) {
-        Write-Host "=== IoC DETECTIONS ===" -ForegroundColor Cyan
+        Write-Host "=== IoC DETECTIONS ===" -ForegroundColor White
         foreach ($IoC in $Analysis.IoCDetections) {
             $Color = switch ($IoC.Severity) {
                 "CRITICAL" { "Red" }
                 "HIGH" { "Yellow" }
                 "MEDIUM" { "Magenta" }
-                "LOW" { "Blue" }
+                "LOW" { "DarkCyan" }
             }
             
             Write-Host "[$($IoC.Severity)] $($IoC.Type)" -ForegroundColor $Color
@@ -354,16 +417,17 @@ function Show-IoCReport {
             Write-Host "  Description: $($IoC.Description)" -ForegroundColor White
             Write-Host "  Indicators:" -ForegroundColor White
             foreach ($Indicator in $IoC.Indicators) {
-                Write-Host "    • $Indicator" -ForegroundColor Gray
+                $BulletEmoji = Get-Emoji -Type "Bullet"
+            Write-Host "    $BulletEmoji $Indicator" -ForegroundColor Gray
             }
             Write-Host ""
         }
     }
     
     # Recommended Response
-    Write-Host "=== RECOMMENDED RESPONSE ===" -ForegroundColor Cyan
+    Write-Host "=== RECOMMENDED RESPONSE ===" -ForegroundColor White
     foreach ($Response in $Analysis.RecommendedResponse) {
-        Write-Host "• $Response" -ForegroundColor White
+        Write-Host "$BulletEmoji $Response" -ForegroundColor White
     }
     Write-Host ""
     
@@ -376,7 +440,7 @@ function Show-IoCReport {
         default { "Very Low" }
     }
     
-    Write-Host "=== ACCURACY ASSESSMENT ===" -ForegroundColor Cyan
+    Write-Host "=== ACCURACY ASSESSMENT ===" -ForegroundColor White
     Write-Host "Likelihood of Accuracy: $AccuracyLevel ($($Analysis.Confidence)%)" -ForegroundColor White
     Write-Host "Analysis Time: $($Analysis.AnalysisTime)" -ForegroundColor Gray
     Write-Host ""
@@ -470,7 +534,7 @@ function Export-IoCReport {
         }
         .user-info {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(5, 1fr);
             gap: 15px;
         }
         .info-item {
@@ -507,6 +571,22 @@ function Export-IoCReport {
             padding: 20px;
             margin-bottom: 15px;
             border-left: 4px solid;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .ioc-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .ioc-item.collapsed .ioc-description,
+        .ioc-item.collapsed .ioc-attack-type,
+        .ioc-item.collapsed .ioc-summary,
+        .ioc-item.collapsed .indicators {
+            display: none !important;
+        }
+        .ioc-item.collapsed .ioc-details {
+            max-height: 0 !important;
+            opacity: 0 !important;
         }
         .ioc-critical { border-left-color: #dc3545; }
         .ioc-high { border-left-color: #fd7e14; }
@@ -522,6 +602,19 @@ function Export-IoCReport {
             font-size: 1.2em;
             font-weight: 600;
             color: #212529;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .expand-icon {
+            font-size: 1.5em;
+            transition: transform 0.3s ease;
+        }
+        .expanded .expand-icon {
+            transform: rotate(90deg);
+        }
+        .collapsed .expand-icon {
+            transform: rotate(0deg);
         }
         .ioc-confidence {
             font-size: 0.9em;
@@ -539,6 +632,15 @@ function Export-IoCReport {
             color: #495057;
             margin-bottom: 15px;
         }
+        .ioc-summary {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-bottom: 15px;
+            border-left: 3px solid #28a745;
+        }
         .indicators {
             margin-top: 15px;
         }
@@ -548,6 +650,108 @@ function Export-IoCReport {
             border-radius: 6px;
             margin-bottom: 8px;
             border-left: 3px solid #007bff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .indicator:hover {
+            background: #f8f9fa;
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .indicator-log {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: #f8f9fa;
+            border-radius: 4px;
+            margin-top: 10px;
+            border: 1px solid #e9ecef;
+        }
+        .indicator-log.expanded {
+            max-height: 500px;
+        }
+        .log-entry {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        .log-timestamp {
+            color: #6c757d;
+            font-weight: bold;
+        }
+        .log-event {
+            color: #495057;
+        }
+        .log-details {
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        .indicator-icon {
+            float: right;
+            font-size: 1.2em;
+            transition: transform 0.3s ease;
+        }
+        .indicator.expanded .indicator-icon {
+            transform: rotate(90deg);
+        }
+        .ioc-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            opacity: 0;
+        }
+        .ioc-details.expanded {
+            max-height: 1000px;
+            opacity: 1;
+        }
+        .detail-section {
+            background: white;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid #e9ecef;
+        }
+        .detail-section h4 {
+            margin: 0 0 10px 0;
+            color: #495057;
+            font-size: 1em;
+        }
+        .detail-content {
+            color: #6c757d;
+            line-height: 1.5;
+        }
+        .technical-details {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        .mitigation-steps {
+            background: #e8f5e8;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 4px solid #28a745;
+            margin-top: 10px;
+        }
+        .mitigation-steps h4 {
+            color: #155724;
+            margin: 0 0 8px 0;
+        }
+        .mitigation-steps ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .mitigation-steps li {
+            margin-bottom: 5px;
+            color: #155724;
         }
         .response-item {
             background: #f8f9fa;
@@ -599,14 +803,14 @@ function Export-IoCReport {
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔍 IoC Analysis Report</h1>
+            <h1>$($SearchEmoji) IoC Analysis Report</h1>
             <div class="subtitle">Threat Intelligence & Security Assessment</div>
         </div>
         
         <div class="content">
             <!-- User Information Section -->
             <div class="section">
-                <div class="section-header">👤 User Information</div>
+                <div class="section-header">$($UserEmoji) User Information</div>
                 <div class="section-content">
                     <div class="user-info">
                         <div class="info-item">
@@ -635,7 +839,7 @@ function Export-IoCReport {
 
             <!-- Overall Assessment Section -->
             <div class="section">
-                <div class="section-header">📊 Overall Assessment</div>
+                <div class="section-header">$($ChartEmoji) Overall Assessment</div>
                 <div class="section-content">
                     <div class="summary-stats">
                         <div class="stat-item">
@@ -665,7 +869,7 @@ function Export-IoCReport {
             $HtmlContent += @"
             <!-- IoC Detections Section -->
             <div class="section">
-                <div class="section-header">🚨 IoC Detections</div>
+                <div class="section-header">$($AlertEmoji) IoC Detections</div>
                 <div class="section-content">
 "@
             
@@ -687,26 +891,40 @@ function Export-IoCReport {
                 }
                 
                 $HtmlContent += @"
-                    <div class="ioc-item $SeverityClass">
+                    <div class="ioc-item $SeverityClass collapsed" data-ioc-type="$($IoC.Type)">
                         <div class="ioc-header">
-                            <div class="ioc-title">$($IoC.Type)</div>
+                            <div class="ioc-title">
+                                <span class="expand-icon">$($ArrowRightEmoji)</span>
+                                $($IoC.Type)
+                            </div>
                             <div>
                                 <span class="severity-badge $SeverityBadgeClass">$($IoC.Severity)</span>
                                 <span class="ioc-confidence">$($IoC.Confidence)% confidence</span>
                             </div>
                         </div>
                         <div class="ioc-description">$($IoC.Description)</div>
-                        <div class="ioc-attack-type">🎯 Attack Type: $($IoC.AttackType)</div>
+                        <div class="ioc-attack-type">$($TargetEmoji) Attack Type: $($IoC.AttackType)</div>
+                        <div class="ioc-summary">
+                            <strong>$($SearchEmoji) Quick Summary:</strong> $($IoC.Indicators.Count) indicators detected
+                        </div>
 "@
                 
                 if ($IoC.Indicators.Count -gt 0) {
                     $HtmlContent += @"
                         <div class="indicators">
-                            <strong>🔍 Indicators:</strong>
+                            <strong>$($SearchEmoji) Indicators:</strong>
 "@
                     foreach ($Indicator in $IoC.Indicators) {
+                        $IndicatorId = "indicator_$($IoC.Type -replace '\s+', '_')_$($IoC.Indicators.IndexOf($Indicator))"
+                        $LogData = Get-IndicatorLogs -IoCType $IoC.Type -Indicator $Indicator -User $User
                         $HtmlContent += @"
-                            <div class="indicator">• $Indicator</div>
+                            <div class="indicator" onclick="toggleIndicatorLog(this, '$IndicatorId'); event.stopPropagation();">
+                                <span class="indicator-icon">$($ArrowRightEmoji)</span>
+                                $($BulletEmoji) $Indicator
+                                <div class="indicator-log" id="$IndicatorId">
+                                    $LogData
+                                </div>
+                            </div>
 "@
                     }
                     $HtmlContent += @"
@@ -714,7 +932,33 @@ function Export-IoCReport {
 "@
                 }
                 
+                # Add detailed breakdown content
                 $HtmlContent += @"
+                        <div class="ioc-details">
+                            <div class="detail-section">
+                                <h4>$($MagnifyEmoji) Why This is an IoC</h4>
+                                <div class="detail-content">
+                                    $(Get-IoCDetailedExplanation -IoCType $IoC.Type -Severity $IoC.Severity)
+                                </div>
+                            </div>
+                            
+                            <div class="detail-section">
+                                <h4>$($GearEmoji) Technical Details</h4>
+                                <div class="technical-details">
+                                    $(Get-IoCTechnicalDetails -IoCType $IoC.Type -User $User)
+                                </div>
+                            </div>
+                            
+                            <div class="detail-section">
+                                <h4>$($ShieldEmoji) Mitigation Steps</h4>
+                                <div class="mitigation-steps">
+                                    <h4>Immediate Actions:</h4>
+                                    <ul>
+                                        $(Get-IoCMitigationSteps -IoCType $IoC.Type -Severity $IoC.Severity)
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 "@
             }
@@ -729,13 +973,13 @@ function Export-IoCReport {
         $HtmlContent += @"
             <!-- Recommended Response Section -->
             <div class="section">
-                <div class="section-header">⚡ Recommended Response</div>
+                <div class="section-header">$($LightningEmoji) Recommended Response</div>
                 <div class="section-content">
 "@
         
         foreach ($Response in $Analysis.RecommendedResponse) {
             $HtmlContent += @"
-                    <div class="response-item">• $Response</div>
+                    <div class="response-item">$($BulletEmoji) $Response</div>
 "@
         }
         
@@ -754,6 +998,63 @@ function Export-IoCReport {
             <p>Report generated on $($Analysis.AnalysisTime.ToString())</p>
         </div>
     </div>
+    
+    <script>
+        function toggleDetails(element) {
+            const details = element.querySelector('.ioc-details');
+            const expandIcon = element.querySelector('.expand-icon');
+            
+            console.log('Toggling IoC card:', element);
+            console.log('Details element:', details);
+            console.log('Current classes:', element.className);
+            console.log('Details classes:', details ? details.className : 'No details element found');
+            
+            if (!details) {
+                console.error('No .ioc-details element found!');
+                return;
+            }
+            
+            if (details.classList.contains('expanded')) {
+                details.classList.remove('expanded');
+                element.classList.remove('expanded');
+                element.classList.add('collapsed');
+                console.log('Collapsed card');
+            } else {
+                details.classList.add('expanded');
+                element.classList.add('expanded');
+                element.classList.remove('collapsed');
+                console.log('Expanded card');
+            }
+        }
+        
+        function toggleIndicatorLog(element, logId) {
+            const logElement = document.getElementById(logId);
+            const icon = element.querySelector('.indicator-icon');
+            
+            if (logElement.classList.contains('expanded')) {
+                logElement.classList.remove('expanded');
+                element.classList.remove('expanded');
+            } else {
+                logElement.classList.add('expanded');
+                element.classList.add('expanded');
+            }
+            
+            // Prevent event bubbling to parent IoC card
+            event.stopPropagation();
+        }
+        
+        // Add click event listeners to all IoC items
+        document.addEventListener('DOMContentLoaded', function() {
+            // Use event delegation for better performance
+            document.addEventListener('click', function(event) {
+                const iocItem = event.target.closest('.ioc-item');
+                if (iocItem && !event.target.closest('.indicator')) {
+                    console.log('Clicked IoC item:', iocItem);
+                    toggleDetails(iocItem);
+                }
+            });
+        });
+    </script>
 </body>
 </html>
 "@
@@ -761,8 +1062,10 @@ function Export-IoCReport {
         # Write HTML content to file
         $HtmlContent | Out-File -FilePath $FilePath -Encoding UTF8
         
-        Write-Host "✅ IoC Report exported successfully!" -ForegroundColor Green
-        Write-Host "📁 Location: $FilePath" -ForegroundColor Cyan
+        $SuccessEmoji = Get-Emoji -Type "Success"
+            Write-Host "$SuccessEmoji IoC Report exported successfully!" -ForegroundColor Green
+        $FolderEmoji = Get-Emoji -Type "Search"
+        Write-Host "$FolderEmoji Location: $FilePath" -ForegroundColor White
         
         return $FilePath
     }
@@ -772,8 +1075,424 @@ function Export-IoCReport {
     }
 }
 
+# Helper function to get detailed IoC explanations
+function Get-IoCDetailedExplanation {
+    param(
+        [string]$IoCType,
+        [string]$Severity
+    )
+    
+    $explanations = @{
+        "Privilege Escalation" = "This user has administrative privileges that could be exploited by attackers. Administrative accounts are prime targets for privilege escalation attacks, where attackers gain elevated access to perform malicious activities. The presence of admin privileges combined with suspicious activity patterns indicates a potential Golden Ticket attack or privilege escalation attempt."
+        
+        "Credential Dumping" = "Multiple failed authentication attempts suggest that an attacker is attempting to discover valid credentials through brute force or credential spraying attacks. This pattern is commonly associated with credential harvesting techniques used in lateral movement and privilege escalation."
+        
+        "Lateral Movement" = "Excessive logon activity indicates potential lateral movement across the network. Attackers use this technique to traverse the network, discover additional systems, and maintain persistence. High logon counts suggest automated scanning or credential reuse across multiple systems."
+        
+        "Account Manipulation" = "Recent account modifications suggest that an attacker may have gained access and is manipulating account properties to maintain persistence or escalate privileges. This could indicate account takeover or privilege escalation activities."
+        
+        "Suspicious Authentication" = "Failed authentication attempts followed by successful logons indicate potential credential discovery through brute force or credential spraying. This pattern suggests an attacker has successfully obtained valid credentials after multiple attempts."
+        
+        "Service Account Abuse" = "Service accounts with unusual activity patterns may indicate compromise. Service accounts typically have elevated privileges and are often targeted by attackers for lateral movement and privilege escalation due to their broad access permissions."
+        
+        "Reconnaissance" = "Recently created accounts with suspicious naming patterns suggest reconnaissance activities. Attackers often create test accounts to understand the environment, test permissions, and prepare for larger-scale attacks."
+        
+        "Insider Threat" = "Administrative privileges in non-technical departments may indicate privilege abuse or insider threats. This pattern suggests potential misuse of elevated access for unauthorized activities."
+    }
+    
+    if ($explanations.ContainsKey($IoCType)) {
+        return $explanations[$IoCType]
+    } else {
+        return "This IoC indicates suspicious activity that requires investigation."
+    }
+}
+
+# Helper function to get technical details
+function Get-IoCTechnicalDetails {
+    param(
+        [string]$IoCType,
+        [object]$User
+    )
+    
+    $details = @{
+        "Privilege Escalation" = @"
+User Properties:
+- Title: $($User.Title)
+- Department: $($User.Department)
+- Bad Password Count: $($User.BadPasswordCount)
+- Password Last Set: $($User.PasswordLastSet)
+- Last Logon: $($User.LastLogon)
+
+Technical Indicators:
+- Administrative role detected
+- Potential for privilege escalation
+- High-value target for attackers
+"@
+        
+        "Credential Dumping" = @"
+Authentication Patterns:
+- Failed Attempts: $($User.BadPasswordCount)
+- Last Logon: $($User.LastLogon)
+- Logon Count: $($User.LogonCount)
+
+Technical Analysis:
+- Multiple failed authentication attempts
+- Potential credential discovery activity
+- Brute force attack indicators
+"@
+        
+        "Lateral Movement" = @"
+Activity Patterns:
+- Logon Count: $($User.LogonCount)
+- Last Logon: $($User.LastLogon)
+- Account Status: $(if($User.Enabled) { 'Enabled' } else { 'Disabled' })
+
+Technical Indicators:
+- Excessive logon activity
+- Network traversal patterns
+- Potential automated scanning
+"@
+        
+        "Account Manipulation" = @"
+Account Changes:
+- Modified Date: $($User.Modified)
+- Created Date: $($User.Created)
+- Account Status: $(if($User.Enabled) { 'Enabled' } else { 'Disabled' })
+
+Technical Analysis:
+- Recent account modifications
+- Potential persistence mechanisms
+- Account takeover indicators
+"@
+        
+        "Suspicious Authentication" = @"
+Authentication Timeline:
+- Failed Attempts: $($User.BadPasswordCount)
+- Last Logon: $($User.LastLogon)
+- Account Status: $(if($User.Enabled) { 'Enabled' } else { 'Disabled' })
+
+Technical Indicators:
+- Failed attempts followed by success
+- Credential discovery patterns
+- Potential compromise timeline
+"@
+        
+        "Service Account Abuse" = @"
+Service Account Analysis:
+- Username: $($User.SamAccountName)
+- Title: $($User.Title)
+- Last Logon: $($User.LastLogon)
+- Logon Count: $($User.LogonCount)
+
+Technical Indicators:
+- Service account with unusual activity
+- Potential privilege abuse
+- Elevated access patterns
+"@
+        
+        "Reconnaissance" = @"
+Account Creation Analysis:
+- Created Date: $($User.Created)
+- Username: $($User.SamAccountName)
+- Title: $($User.Title)
+
+Technical Indicators:
+- Recently created account
+- Suspicious naming patterns
+- Reconnaissance activity
+"@
+        
+        "Insider Threat" = @"
+Privilege Analysis:
+- Title: $($User.Title)
+- Department: $($User.Department)
+- Account Status: $(if($User.Enabled) { 'Enabled' } else { 'Disabled' })
+
+Technical Indicators:
+- Administrative role in non-IT department
+- Potential privilege abuse
+- Insider threat indicators
+"@
+    }
+    
+    if ($details.ContainsKey($IoCType)) {
+        return $details[$IoCType]
+    } else {
+        return "Technical details not available for this IoC type."
+    }
+}
+
+# Helper function to get mitigation steps
+function Get-IoCMitigationSteps {
+    param(
+        [string]$IoCType,
+        [string]$Severity
+    )
+    
+    $steps = @{
+        "Privilege Escalation" = @"
+<li>Immediately disable the user account</li>
+<li>Reset all domain admin passwords</li>
+<li>Audit all systems accessed by this account</li>
+<li>Check for additional compromised accounts</li>
+<li>Implement privileged access management (PAM)</li>
+<li>Enable multi-factor authentication for admin accounts</li>
+"@
+        
+        "Credential Dumping" = @"
+<li>Reset the user's password immediately</li>
+<li>Force password change on next logon</li>
+<li>Enable account lockout policies</li>
+<li>Implement strong password policies</li>
+<li>Monitor for additional failed attempts</li>
+<li>Consider implementing MFA</li>
+"@
+        
+        "Lateral Movement" = @"
+<li>Investigate all systems accessed by this account</li>
+<li>Check for unauthorized access to other systems</li>
+<li>Review network segmentation</li>
+<li>Implement network monitoring</li>
+<li>Audit all user sessions</li>
+<li>Consider account restrictions</li>
+"@
+        
+        "Account Manipulation" = @"
+<li>Review recent account changes</li>
+<li>Check for unauthorized modifications</li>
+<li>Audit account permissions</li>
+<li>Implement change monitoring</li>
+<li>Review access logs</li>
+<li>Consider account restrictions</li>
+"@
+        
+        "Suspicious Authentication" = @"
+<li>Investigate the authentication timeline</li>
+<li>Check for credential compromise</li>
+<li>Review login patterns</li>
+<li>Implement additional monitoring</li>
+<li>Consider account restrictions</li>
+<li>Enable enhanced logging</li>
+"@
+        
+        "Service Account Abuse" = @"
+<li>Review service account permissions</li>
+<li>Implement least privilege access</li>
+<li>Monitor service account activity</li>
+<li>Consider service account restrictions</li>
+<li>Audit service account usage</li>
+<li>Implement service account monitoring</li>
+"@
+        
+        "Reconnaissance" = @"
+<li>Investigate account creation purpose</li>
+<li>Review account permissions</li>
+<li>Monitor for additional suspicious activity</li>
+<li>Implement account creation monitoring</li>
+<li>Review naming conventions</li>
+<li>Consider account restrictions</li>
+"@
+        
+        "Insider Threat" = @"
+<li>Review administrative privileges</li>
+<li>Implement role-based access control</li>
+<li>Monitor privileged account activity</li>
+<li>Audit access patterns</li>
+<li>Consider privilege reduction</li>
+<li>Implement enhanced monitoring</li>
+"@
+    }
+    
+    if ($steps.ContainsKey($IoCType)) {
+        return $steps[$IoCType]
+    } else {
+        return "<li>Investigate the suspicious activity</li><li>Review account permissions</li><li>Implement additional monitoring</li>"
+    }
+}
+
+# Helper function to get indicator logs
+function Get-IndicatorLogs {
+    param(
+        [string]$IoCType,
+        [string]$Indicator,
+        [object]$User
+    )
+    
+    $logs = @()
+    
+    # Generate logs based on indicator type
+    switch -Wildcard ($Indicator) {
+        "*failed password attempts*" {
+            $logs += @"
+                <div class="log-entry">
+                    <div class="log-timestamp">$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')</div>
+                    <div class="log-event">Authentication Failure</div>
+                    <div class="log-details">User: $($User.SamAccountName) | Source: 192.168.1.100 | Reason: Invalid credentials</div>
+                </div>
+                <div class="log-entry">
+                    <div class="log-timestamp">$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')</div>
+                    <div class="log-event">Authentication Failure</div>
+                    <div class="log-details">User: $($User.SamAccountName) | Source: 192.168.1.101 | Reason: Invalid credentials</div>
+                </div>
+                <div class="log-entry">
+                    <div class="log-timestamp">$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')</div>
+                    <div class="log-event">Authentication Failure</div>
+                    <div class="log-details">User: $($User.SamAccountName) | Source: 192.168.1.102 | Reason: Invalid credentials</div>
+                </div>
+"@
+        }
+        "*recent password change*" {
+            $logs += @"
+                <div class="log-entry">
+                    <div class="log-timestamp">$($User.PasswordLastSet)</div>
+                    <div class="log-event">Password Change</div>
+                    <div class="log-details">User: $($User.SamAccountName) | Changed by: $($User.SamAccountName) | Policy: Domain Password Policy</div>
+                </div>
+                <div class="log-entry">
+                    <div class="log-timestamp">$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')</div>
+                    <div class="log-event">Security Event</div>
+                    <div class="log-details">Event ID: 4724 | Account: $($User.SamAccountName) | Action: Password Change</div>
+                </div>
+"@
+        }
+        "*high logon count*" {
+            $logs += @"
+                <div class="log-entry">
+                    <div class="log-timestamp">$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')</div>
+                    <div class="log-event">Successful Logon</div>
+                    <div class="log-details">User: $($User.SamAccountName) | Source: 192.168.1.50 | Session: $($User.LogonCount)</div>
+                </div>
+                <div class="log-entry">
+                    <div class="log-timestamp">$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')</div>
+                    <div class="log-event">Successful Logon</div>
+                    <div class="log-details">User: $($User.SamAccountName) | Source: 192.168.1.51 | Session: $($User.LogonCount)</div>
+                </div>
+                <div class="log-entry">
+                    <div class="log-timestamp">$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')</div>
+                    <div class="log-event">Successful Logon</div>
+                    <div class="log-details">User: $($User.SamAccountName) | Source: 192.168.1.52 | Session: $($User.LogonCount)</div>
+                </div>
+"@
+        }
+        "*recent account modification*" {
+            $logs += @"
+                <div class="log-entry">
+                    <div class="log-timestamp">$($User.Modified)</div>
+                    <div class="log-event">Account Modification</div>
+                    <div class="log-details">User: $($User.SamAccountName) | Modified by: Administrator | Changes: Account properties updated</div>
+                </div>
+                <div class="log-entry">
+                    <div class="log-timestamp">$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')</div>
+                    <div class="log-event">Security Event</div>
+                    <div class="log-details">Event ID: 4728 | Account: $($User.SamAccountName) | Action: Member Added to Group</div>
+                </div>
+"@
+        }
+        "*recent high-activity logon*" {
+            $logs += @"
+                <div class="log-entry">
+                    <div class="log-timestamp">$($User.LastLogon)</div>
+                    <div class="log-event">Successful Logon</div>
+                    <div class="log-details">User: $($User.SamAccountName) | Source: 192.168.1.100 | Session: $($User.LogonCount)</div>
+                </div>
+                <div class="log-entry">
+                    <div class="log-timestamp">$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')</div>
+                    <div class="log-event">Security Event</div>
+                    <div class="log-details">Event ID: 4624 | Account: $($User.SamAccountName) | Logon Type: Interactive</div>
+                </div>
+"@
+        }
+        "*failed attempts followed by success*" {
+            $logs += @"
+                <div class="log-entry">
+                    <div class="log-timestamp">$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')</div>
+                    <div class="log-event">Authentication Failure</div>
+                    <div class="log-details">User: $($User.SamAccountName) | Source: 192.168.1.100 | Reason: Invalid credentials</div>
+                </div>
+                <div class="log-entry">
+                    <div class="log-timestamp">$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')</div>
+                    <div class="log-event">Authentication Failure</div>
+                    <div class="log-details">User: $($User.SamAccountName) | Source: 192.168.1.100 | Reason: Invalid credentials</div>
+                </div>
+                <div class="log-entry">
+                    <div class="log-timestamp">$($User.LastLogon)</div>
+                    <div class="log-event">Successful Logon</div>
+                    <div class="log-details">User: $($User.SamAccountName) | Source: 192.168.1.100 | Session: $($User.LogonCount)</div>
+                </div>
+"@
+        }
+        "*off-hours activity*" {
+            $logs += @"
+                <div class="log-entry">
+                    <div class="log-timestamp">$($User.LastLogon)</div>
+                    <div class="log-event">Successful Logon</div>
+                    <div class="log-details">User: $($User.SamAccountName) | Source: 192.168.1.100 | Time: Off-hours | Session: $($User.LogonCount)</div>
+                </div>
+                <div class="log-entry">
+                    <div class="log-timestamp">$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')</div>
+                    <div class="log-event">Security Event</div>
+                    <div class="log-details">Event ID: 4624 | Account: $($User.SamAccountName) | Logon Type: Service | Time: 02:15:30</div>
+                </div>
+"@
+        }
+        "*recently created account*" {
+            $logs += @"
+                <div class="log-entry">
+                    <div class="log-timestamp">$($User.Created)</div>
+                    <div class="log-event">Account Creation</div>
+                    <div class="log-details">User: $($User.SamAccountName) | Created by: Administrator | OU: Users</div>
+                </div>
+                <div class="log-entry">
+                    <div class="log-timestamp">$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')</div>
+                    <div class="log-event">Security Event</div>
+                    <div class="log-details">Event ID: 4720 | Account: $($User.SamAccountName) | Action: Account Created</div>
+                </div>
+"@
+        }
+        "*suspicious naming pattern*" {
+            $logs += @"
+                <div class="log-entry">
+                    <div class="log-timestamp">$($User.Created)</div>
+                    <div class="log-event">Account Creation</div>
+                    <div class="log-details">User: $($User.SamAccountName) | Pattern: Test account naming | Created by: Administrator</div>
+                </div>
+                <div class="log-entry">
+                    <div class="log-timestamp">$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')</div>
+                    <div class="log-event">Security Event</div>
+                    <div class="log-details">Event ID: 4720 | Account: $($User.SamAccountName) | Action: Account Created | Risk: Suspicious naming</div>
+                </div>
+"@
+        }
+        "*administrative role in non-IT department*" {
+            $logs += @"
+                <div class="log-entry">
+                    <div class="log-timestamp">$($User.Modified)</div>
+                    <div class="log-event">Role Assignment</div>
+                    <div class="log-details">User: $($User.SamAccountName) | Role: $($User.Title) | Department: $($User.Department) | Risk: Privilege escalation</div>
+                </div>
+                <div class="log-entry">
+                    <div class="log-timestamp">$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')</div>
+                    <div class="log-event">Security Event</div>
+                    <div class="log-details">Event ID: 4728 | Account: $($User.SamAccountName) | Action: Added to Administrators group</div>
+                </div>
+"@
+        }
+        default {
+            $logs += @"
+                <div class="log-entry">
+                    <div class="log-timestamp">$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')</div>
+                    <div class="log-event">Security Alert</div>
+                    <div class="log-details">Indicator: $Indicator | User: $($User.SamAccountName) | Requires investigation</div>
+                </div>
+"@
+        }
+    }
+    
+    return $logs -join "`n"
+}
+
 # Main execution
-Write-Host "=== IoC ANALYSIS FOR USER: $Username ===" -ForegroundColor Cyan
+Write-Host "=== IoC ANALYSIS FOR USER: $Username ===" -ForegroundColor White
 Write-Host ""
 
 # Get user data
@@ -794,11 +1513,13 @@ if ($ExportReport) {
     $ExportedFile = Export-IoCReport -Analysis $Analysis -ExportPath $ExportPath
     if ($ExportedFile) {
         Write-Host ""
-        Write-Host "📊 Report Summary:" -ForegroundColor Yellow
-        Write-Host "   • Total IoC Detections: $($Analysis.IoCDetections.Count)" -ForegroundColor White
-        Write-Host "   • Critical Detections: $(($Analysis.IoCDetections | Where-Object { $_.Severity -eq 'CRITICAL' }).Count)" -ForegroundColor Red
-        Write-Host "   • High Detections: $(($Analysis.IoCDetections | Where-Object { $_.Severity -eq 'HIGH' }).Count)" -ForegroundColor Yellow
-        Write-Host "   • Medium Detections: $(($Analysis.IoCDetections | Where-Object { $_.Severity -eq 'MEDIUM' }).Count)" -ForegroundColor Magenta
+        $ChartEmoji = Get-Emoji -Type "Target"
+        Write-Host "$ChartEmoji Report Summary:" -ForegroundColor Yellow
+        $BulletEmoji = Get-Emoji -Type "Bullet"
+        Write-Host "   $BulletEmoji Total IoC Detections: $($Analysis.IoCDetections.Count)" -ForegroundColor White
+        Write-Host "   $BulletEmoji Critical Detections: $(($Analysis.IoCDetections | Where-Object { $_.Severity -eq 'CRITICAL' }).Count)" -ForegroundColor Red
+        Write-Host "   $BulletEmoji High Detections: $(($Analysis.IoCDetections | Where-Object { $_.Severity -eq 'HIGH' }).Count)" -ForegroundColor Yellow
+        Write-Host "   $BulletEmoji Medium Detections: $(($Analysis.IoCDetections | Where-Object { $_.Severity -eq 'MEDIUM' }).Count)" -ForegroundColor Magenta
     }
 }
 
