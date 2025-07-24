@@ -137,8 +137,8 @@ Function New-ADUser {
             'SID' = $SID
             'PrimaryGroupID' = "513"
             'PasswordLastSet' = $date
-            'LastLogon' = ""
-            'AccountExpires' = ""
+            'LastLogonDate' = ""
+            'AccountExpirationDate' = ""
             'LockoutTime' = ""
             'LockedOut' = "FALSE"
             'LogonCount' = "0"
