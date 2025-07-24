@@ -69,7 +69,7 @@ FormatsToProcess = @("Data\Formats\ADUser.format.ps1xml")
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = @("Get-ADUser", "New-ADUser", "Remove-ADUser", "Enable-ADAccount", "Disable-ADAccount", "Get-ADConfig", "Set-ADConfig", "Test-ADConfig", "Set-ADAccountPassword", "Show-ADProgress", "Start-ADOperation", "Update-ADOperation", "Complete-ADOperation", "Show-ADBulkProgress", "Show-ADStatus", "Get-ADPasswordPolicy", "Test-ADPasswordComplexity", "ConvertTo-ADPasswordHash", "Test-ADPassword", "Search-ADAccount", "Get-Emoji", "Write-EmojiMessage")
+FunctionsToExport = @("Get-ADUser", "New-ADUser", "Remove-ADUser", "Enable-ADAccount", "Disable-ADAccount", "Search-ADAccount", "Get-ADConfig", "Set-ADConfig", "Test-ADConfig", "Set-ADAccountPassword", "Show-ADProgress", "Start-ADOperation", "Update-ADOperation", "Complete-ADOperation", "Show-ADBulkProgress", "Show-ADStatus", "Get-ADPasswordPolicy", "Test-ADPasswordComplexity", "ConvertTo-ADPasswordHash", "Test-ADPassword", "Get-Emoji", "Write-EmojiMessage")
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()
