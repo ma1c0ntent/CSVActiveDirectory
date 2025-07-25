@@ -12,7 +12,7 @@ Function Remove-ADUser {
         [switch]$Force
     )
     Begin {
-        $database = Import-Csv -Path "$PSScriptRoot\..\..\Data\Database\Database.csv"
+        $database = Import-Csv -Path "Data\Database\Database.csv"
     }
     Process {
         Foreach ($User in $Identity) {
@@ -33,6 +33,6 @@ Function Remove-ADUser {
         }
     }
     End {
-        $database | Export-Csv -Path "$PSScriptRoot\..\..\Data\Database\Database.csv" -NoTypeInformation
+        $database | Export-Csv -Path "Data\Database\Database.csv" -NoTypeInformation
     }
 }
