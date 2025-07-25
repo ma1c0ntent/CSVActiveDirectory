@@ -64,7 +64,7 @@ Function New-ADUser {
     )
 
     Begin {
-        $database = Import-Csv -Path "$PSScriptRoot\..\..\Data\Database\Database.csv"
+        $database = Import-Csv -Path "Data\Database\Database.csv"
         
         # Check if user already exists
         If ($database | Where-Object { $_.SamAccountName -eq $SamAccountName }) {
@@ -160,7 +160,7 @@ Function New-ADUser {
     }
     
     End {
-        $NewUser | Export-Csv -Path "$PSScriptRoot\..\..\Data\Database\Database.csv" -Append -NoTypeInformation
+        $NewUser | Export-Csv -Path "Data\Database\Database.csv" -Append -NoTypeInformation
         $NewUser.PSTypeNames.Insert(0, "ADUser")
         return $NewUser
     }
