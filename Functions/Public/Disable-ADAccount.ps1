@@ -1,40 +1,110 @@
-Function Disable-ADAccount {
+Function Get-ADUser {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true,
+        ParameterSetName = "Identity",
         ValueFromPipeline = $true,
         Position = 0,
         HelpMessage = "Enter the SamAccountName of the user"
         )]
-        [string[]]$Identity
+        [string[]]$Identity,
+
+        [Parameter(Mandatory = $true,
+        ParameterSetName = "Filter")]
+        [string]$Filter,
+        
+        [Parameter(Mandatory = $false)]
+        [string[]]$Properties
     )
     Begin {
         $database = Import-Csv -Path "Data\Database\Database.csv"
-        $datetime = Get-Date
-        $date = $datetime.ToShortDateString()
-        $time = $datetime.ToShortTimeString()
     }
     Process {
-            
-        Foreach ($User in $Identity) {
-            $FoundUser = $database | Where-Object { $_.SamAccountName -in $User }
-            If ($FoundUser -AND $FoundUser.Enabled -eq "TRUE") {
-                $FoundUser.Enabled = "FALSE"
-                $FoundUser.Modified = "$date $time"
-                    Write-Verbose "Found user $($FoundUser.SamAccountName)"
-                    Write-Verbose "User $($FoundUser.SamAccountName) currently enabled"
-                    Write-Verbose "Disabling user $($FoundUser.SamAccountName)"
-                    Write-Verbose "User $($FoundUser.SamAccountName) disabled"
-            }
-            ElseIf($FoundUser -AND $FoundUser.Enabled -eq "FALSE") {
-                Write-Warning "User $($FoundUser.SamAccountName) already disabled"
+        If ($PSCmdlet.ParameterSetName -eq "Filter") {
+
+            If ($Filter -eq "*") {
+                if ($Properties) {
+                    $users = $database | Select-Object -Property $Properties
+                    $ssers | Select-Object -Property $Properties
+                } else {
+                    $users = $database | Select-Object DistinguisedName, FirstName, LastName, DisplayName, SamAccountName, Enabled
+                    foreach ($user in $users) {
+                        $user.PSTypeNames.Insert(0, "ADUser")
+                    }
+                    $Users | Select-Object DistinguishedName, FirstName, LastName, DisplayName, SamAccountName, Enabled
+                    return
+                }
             }
             Else {
-                Write-Warning "User not found"
+                $param1, $param2, $param3 = $filter.Split(' ')
+                $Expression = "`$database | Where-Object { `$_.$param1 $param2 $param3}"
+                $results = Invoke-Expression -Command $Expression
+                if ($Properties) {
+                    $users = $results | Select-Object -Property $Properties
+                    $users | Select-Object -Property $Properties
+                } else {
+                    $users = $results | Select-Object DistinguishedName, FirstName, LastName, DisplayName, SamAccountName, Enabled
+                    foreach ($user in $users) {
+                        $user.PSTypeNames.Insert(0, "ADUser")
+                    }
+                    $Users | Select-Object DistinguishedName, FirstName, LastName, DisplayName, SamAccountName, Enabled
+                    return
+                }
+                Break
             }
         }
-    }
-    End {
-        $database | Export-Csv -Path "Data\Database\Database.csv" -NoTypeInformation
+        Else {
+            If ($Identity -and (-not($Properties))) {
+                
+                If ($Identity -eq "*") {
+                    $users = $database | Select-Object DistinguishedName, FirstName, LastName, DisplayName, SamAccountName, Enabled
+                    foreach ($user in $users) {
+                        $user.PSTypeNames.Insert(0, "ADUser")
+                    }
+                    $Users | Select-Object DistinguishedName, FirstName, LastName, DisplayName, SamAccountName, Enabled
+                    return
+                }
+                
+                $FoundUser = $database | Where-Object { $_.SamAccountName -match $Identity }
+                If ($FoundUser) {
+                    $User = [PSCustomObject] @{
+                        'DistinguishedName' = $FoundUser.'DistinguishedName'
+                        'FirstName' = $FoundUser.'FirstName'
+                        'LastName'  = $FoundUser.'LastName'
+                        'DisplayName' = $FoundUser.'DisplayName'
+                        'SamAccountName' = $FoundUser.'SamAccountName'
+                        'Enabled' = $FoundUser.'Enabled'
+                    }
+                    $User.PSTypeNames.Insert(0, "ADUser")
+                    
+                    $User | Select-Object DistinguishedName, FirstName, LastName, DisplayName, SamAccountName, Enabled
+                    return
+                }
+                Else {
+                    Write-Warning "User not found"
+                    Break
+                }
+            }
+            ElseIf (($Identity -and $Properties)) {
+                If ($Identity -eq "*") {
+                    $users = $database | Select-Object -Property $Properties
+                    
+                    $Users | Select-Object -Property $Properties
+                    return
+                }
+                
+                $FoundUser = $database | Where-Object { $_.SamAccountName -in $Identity }
+                If ($FoundUser) {
+                    $users = $FoundUser | Select-Object -Property $Properties
+
+                    $Users | Select-Object -Property $Properties
+                    return
+                }
+                Else {
+                    Write-Warning "User not found"
+                    Break
+                }
+            }
+        }
     }
 }
