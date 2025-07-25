@@ -9,7 +9,7 @@ Describe "Search-ADAccount" {
         # Ensure we have a database to test with
         if (-not (Test-Path "Data\Database\Database.csv")) {
             Write-Warning "Database not found. Running Create-Users.ps1 to generate test data..."
-            & "$PSScriptRoot\..\..\Scripts\Create-Users.ps1" -UserCount 10 -SkipSecurityTest
+            & "$PSScriptRoot\..\..\Scripts\Private\Create-Users.ps1" -UserCount 10 -SkipSecurityTest
         }
     }
 

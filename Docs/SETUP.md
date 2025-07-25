@@ -16,10 +16,13 @@ The repository comes with an empty database for security. You must create users 
 .\install.ps1
 
 # Option 2: Manual user creation
-.\Scripts\Create-Users.ps1
+.\Functions\Private\Create-Users.ps1
 
 # Option 3: Custom user creation
-.\Scripts\Create-Users.ps1 -UserCount 200 -RiskPercentage 25
+.\Functions\Private\Create-Users.ps1 -UserCount 200 -RiskPercentage 25
+
+# Option 4: Create users with backup (recommended for production)
+.\Functions\Private\Create-Users.ps1 -BackupExisting
 ```
 
 ### Step 3: Verify Installation
@@ -57,7 +60,7 @@ Get-ADUser -Identity "*" | Select-Object -First 3
 .\install.ps1 -SkipSecurityTest
 
 # Manual user creation with custom settings
-.\Scripts\Create-Users.ps1 -UserCount 100 -RiskPercentage 20
+.\Functions\Private\Create-Users.ps1 -UserCount 100 -RiskPercentage 20
 ```
 
 ### Manual Setup
@@ -69,7 +72,7 @@ Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
 Import-Module .\CSVActiveDirectory.psd1 -Force
 
 # Create users
-.\Scripts\Create-Users.ps1
+.\Functions\Private\Create-Users.ps1
 
 # Test functionality
 Get-ADUser -Identity "*" | Measure-Object
@@ -110,7 +113,7 @@ Get-ADUser -Identity "bfoster" -Properties *
 .\Scripts\Get-IOCs.ps1 -Username "jmorales"
 
 # Enterprise security report
-.\Scripts\Get-SecurityReport.ps1 -EnhancedIoCDetection
+.\Scripts\Public\Get-SecurityReport.ps1 -EnhancedIoCDetection
 ```
 
 ### Test User Management
@@ -136,7 +139,7 @@ Remove-ADUser -Identity "testuser" -Confirm:$false
 Test-Path "Data\Database\Database.csv"
 
 # Recreate users if needed
-.\Scripts\Create-Users.ps1
+.\Scripts\Private\Create-Users.ps1
 ```
 
 **Module not found:**
@@ -164,16 +167,27 @@ After successful setup:
 4. **Check Docs/** for detailed documentation
 5. **Try Security Analysis** with IoC detection
 
-## 🆘 Support
+## 💾 Backup Management
 
-If you encounter issues:
+The module includes automatic backup functionality:
 
-1. Check this setup guide
-2. Review README.md for detailed instructions
-3. Run the test suite: `Invoke-Pester -Path "Tests"`
-4. Check the logs in `Data/Logs/` (if enabled)
-5. Submit an issue with detailed error information
+### Creating Backups
+```powershell
+# Create users with automatic backup
+.\Scripts\Private\Create-Users.ps1 -BackupExisting
 
----
+# Backup files are automatically compressed to save space
+# Files: Database.backup.YYYYMMDD-HHMMSS.zip
+```
 
-**Note**: This module is for educational and testing purposes. Always create users after cloning to enable full functionality. 
+### Managing Backups
+```powershell
+# View all backup files
+.\Scripts\Private\Cleanup-Backups.ps1
+
+# Delete backups older than 7 days
+.\Scripts\Private\Cleanup-Backups.ps1 -DeleteAfterDays 7
+
+# Delete all backups (with confirmation)
+.\Scripts\Private\Cleanup-Backups.ps1 -DeleteAll
+```

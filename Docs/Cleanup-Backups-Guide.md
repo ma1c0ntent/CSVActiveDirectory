@@ -7,7 +7,7 @@ The `Cleanup-Backups.ps1` script is designed to manage backup database files cre
 ## Features
 
 ### 🔍 **Smart Detection**
-- Automatically finds all backup files matching the pattern `Database.backup.*.csv`
+- Automatically finds all backup files matching the patterns `Database.backup.*.csv` and `Database.backup.*.zip`
 - Displays file age, size, and creation time for informed decisions
 - Sorts files by creation date for easy review
 
@@ -27,38 +27,38 @@ The `Cleanup-Backups.ps1` script is designed to manage backup database files cre
 
 ### Basic Usage (Dry Run)
 ```powershell
-.\Scripts\Cleanup-Backups.ps1
+.\Scripts\Private\Cleanup-Backups.ps1
 ```
 Shows all backup files and available options without deleting anything.
 
 ### Age-Based Cleanup
 ```powershell
 # Delete files older than 7 days
-.\Scripts\Cleanup-Backups.ps1 -DeleteAfterDays 7
+.\Scripts\Private\Cleanup-Backups.ps1 -DeleteAfterDays 7
 
 # Delete files older than 30 days
-.\Scripts\Cleanup-Backups.ps1 -DeleteAfterDays 30
+.\Scripts\Private\Cleanup-Backups.ps1 -DeleteAfterDays 30
 ```
 
 ### Delete All Backups
 ```powershell
 # Delete all backup files (with confirmation)
-.\Scripts\Cleanup-Backups.ps1 -DeleteAll
+.\Scripts\Private\Cleanup-Backups.ps1 -DeleteAll
 
 # Delete all backup files (no confirmation)
-.\Scripts\Cleanup-Backups.ps1 -DeleteAll -Force
+.\Scripts\Private\Cleanup-Backups.ps1 -DeleteAll -Force
 ```
 
 ### Preview Mode
 ```powershell
 # Show what would be deleted without actually deleting
-.\Scripts\Cleanup-Backups.ps1 -DeleteAfterDays 7 -WhatIf
+.\Scripts\Private\Cleanup-Backups.ps1 -DeleteAfterDays 7 -WhatIf
 ```
 
 ### Custom Backup Path
 ```powershell
 # Clean up backups in a custom location
-.\Scripts\Cleanup-Backups.ps1 -BackupPath "C:\Custom\Backups" -DeleteAfterDays 7
+.\Scripts\Private\Cleanup-Backups.ps1 -BackupPath "C:\Custom\Backups" -DeleteAfterDays 7
 ```
 
 ## Parameters
@@ -87,10 +87,10 @@ Shows all backup files and available options without deleting anything.
 ### 🔧 **Automation Tips**
 ```powershell
 # Add to scheduled task for weekly cleanup
-.\Scripts\Cleanup-Backups.ps1 -DeleteAfterDays 7 -Force
+.\Scripts\Private\Cleanup-Backups.ps1 -DeleteAfterDays 7 -Force
 
 # Add to PowerShell profile for manual cleanup
-function Cleanup-Backups { .\Scripts\Cleanup-Backups.ps1 -DeleteAfterDays 7 }
+function Cleanup-Backups { .\Scripts\Private\Cleanup-Backups.ps1 -DeleteAfterDays 7 }
 ```
 
 ## Output Examples
@@ -104,7 +104,8 @@ Cleaning up backup database files...
 
 === CURRENT BACKUP FILES ===
   Database.backup.20250723-121928.csv (1 hours ago, 76648 bytes)
-  Database.backup.20250723-122516.csv (1 hours ago, 76555 bytes)
+  Database.backup.20250723-122516.zip (1 hours ago, 15420 bytes)
+  Database.backup.20250723-123045.csv (45 minutes ago, 76555 bytes)
   ...
 
 ℹ DRY RUN MODE: No files will be deleted (use -DeleteAll or -DeleteAfterDays)
@@ -122,21 +123,23 @@ Cutoff date: 2025-07-16 14:06:18
 
 === FILES TO BE DELETED ===
   Database.backup.20250715-121928.csv (8 days ago, 76648 bytes)
-  Database.backup.20250715-122516.csv (8 days ago, 76555 bytes)
+  Database.backup.20250715-122516.zip (8 days ago, 15420 bytes)
+  Database.backup.20250715-123045.csv (8 days ago, 76555 bytes)
 
-Total files to delete: 2
-Total size to free: 153.20 KB
+Total files to delete: 3
+Total size to free: 168.62 KB
 
 WARNING: This action cannot be undone!
 Are you sure you want to delete these files? (y/N): y
 
 === DELETING FILES ===
 ❌ Deleted: Database.backup.20250715-121928.csv
-❌ Deleted: Database.backup.20250715-122516.csv
+❌ Deleted: Database.backup.20250715-122516.zip
+❌ Deleted: Database.backup.20250715-123045.csv
 
 === CLEANUP COMPLETE ===
-✅ Successfully deleted 2 files
-✅ Freed up 153.20 KB of disk space
+✅ Successfully deleted 3 files
+✅ Freed up 168.62 KB of disk space
 ```
 
 ## Troubleshooting
@@ -148,24 +151,24 @@ Are you sure you want to delete these files? (y/N): y
 - Check the `-BackupPath` parameter value
 
 **"No backup files found"**
-- Verify backup files match the pattern `Database.backup.*.csv`
+- Verify backup files match the patterns `Database.backup.*.csv` or `Database.backup.*.zip`
 - Check the backup directory path
 
 **"Permission denied"**
 - Run PowerShell as Administrator
 - Check file permissions on backup directory
 
-### File Pattern
-The script looks for files matching: `Database.backup.*.csv`
+### File Patterns
+The script looks for files matching: `Database.backup.*.csv` and `Database.backup.*.zip`
 
-This matches the backup files created by the `Create-Users.ps1` script when `-BackupExisting` is used.
+This matches the backup files created by the `Create-Users.ps1` script when `-BackupExisting` is used. The script now creates compressed ZIP backups to save disk space.
 
 ## Integration
 
 ### With Scheduled Tasks
 ```powershell
 # Create a scheduled task for weekly cleanup
-$Action = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-ExecutionPolicy Bypass -Command `"& 'C:\Path\To\Scripts\Cleanup-Backups.ps1' -DeleteAfterDays 7 -Force`""
+$Action = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-ExecutionPolicy Bypass -Command `"& 'C:\Path\To\Scripts\Private\Cleanup-Backups.ps1' -DeleteAfterDays 7 -Force`""
 $Trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Sunday -At 2AM
 Register-ScheduledTask -TaskName "CSVActiveDirectory Backup Cleanup" -Action $Action -Trigger $Trigger
 ```
@@ -173,7 +176,7 @@ Register-ScheduledTask -TaskName "CSVActiveDirectory Backup Cleanup" -Action $Ac
 ### With PowerShell Profile
 ```powershell
 # Add to PowerShell profile for quick access
-function Cleanup-Backups { .\Scripts\Cleanup-Backups.ps1 -DeleteAfterDays 7 }
+function Cleanup-Backups { .\Scripts\Private\Cleanup-Backups.ps1 -DeleteAfterDays 7 }
 ```
 
 ## Version Compatibility

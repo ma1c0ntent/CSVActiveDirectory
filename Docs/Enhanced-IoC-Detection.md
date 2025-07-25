@@ -163,17 +163,17 @@ if ($User.SamAccountName -like "*svc*" -and $User.Enabled -eq "TRUE") {
 
 ### Enterprise IoC Detection (CSV Export)
 ```powershell
-.\Scripts\Get-SecurityReport.ps1 -EnhancedIoCDetection
+.\Scripts\Public\Get-SecurityReport.ps1 -EnhancedIoCDetection
 ```
 
 ### Detailed IoC Report
 ```powershell
-.\Scripts\Get-SecurityReport.ps1 -EnhancedIoCDetection -DetailedReport
+.\Scripts\Public\Get-SecurityReport.ps1 -EnhancedIoCDetection -DetailedReport
 ```
 
 ### Custom IoC Parameters
 ```powershell
-.\Scripts\Get-SecurityReport.ps1 -EnhancedIoCDetection -InactiveDays 60 -PasswordAgeDays 45
+.\Scripts\Public\Get-SecurityReport.ps1 -EnhancedIoCDetection -InactiveDays 60 -PasswordAgeDays 45
 ```
 
 ### Individual User IoC Analysis (HTML Export)

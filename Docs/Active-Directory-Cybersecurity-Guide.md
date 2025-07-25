@@ -178,10 +178,10 @@ This comprehensive guide combines cybersecurity scenarios and enhanced Indicator
 ### Enhanced Security Report
 ```powershell
 # Run with enhanced IoC detection
-.\Scripts\Get-SecurityReport.ps1 -EnhancedIoCDetection
+.\Scripts\Public\Get-SecurityReport.ps1 -EnhancedIoCDetection
 
 # Export to CSV with IoC categories
-.\Scripts\Get-SecurityReport.ps1 -EnhancedIoCDetection -ExportCSV "Reports\SecurityReport.csv"
+.\Scripts\Public\Get-SecurityReport.ps1 -EnhancedIoCDetection -ExportCSV "Reports\SecurityReport.csv"
 ```
 
 ### IoC Category Analysis

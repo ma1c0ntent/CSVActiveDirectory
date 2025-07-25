@@ -21,7 +21,7 @@ A comprehensive PowerShell module that simulates Active Directory functionality 
 - **CSV Backend** - Simple, portable data storage
 - **Realistic Data** - Authentic user information and scenarios
 - **Data Integrity** - Consistent data across all operations
-- **Backup System** - Automatic database backups with timestamped files
+- **Backup System** - Automatic database backups with timestamped files and ZIP compression
 
 ### 🔧 Core AD Functions
 - **`Get-ADUser`** - Query users with Identity or Filter parameters
@@ -72,7 +72,7 @@ Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
 - **Cross-version emoji compatibility** (PowerShell 5.1+ and 7+)
 
 ### 🔍 Security & IoC Analysis
-- **`Get-IOCs.ps1`** - Individual user threat analysis with interactive HTML reports
+- **`Get-UserThreatAnalysis.ps1`** - Individual user threat analysis with interactive HTML reports
 - **`Get-SecurityReport.ps1`** - Enterprise security reports with enhanced IoC detection
 - **`Queries.ps1`** - Individual security queries for focused analysis
 - **Professional HTML reports** with clickable IoC items and collapsible categories
@@ -81,7 +81,7 @@ Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
 
 ### 🧹 Database Management
 - **`Cleanup-Backups.ps1`** - Comprehensive backup management with age-based deletion
-- **Automatic backup system** with timestamped files
+- **Automatic backup system** with timestamped files and ZIP compression
 - **Disk space management** with safety features and confirmation prompts
 
 ## 🚀 Getting Started
@@ -105,10 +105,10 @@ Get-Command -Module CSVActiveDirectory
 .\install.ps1
 
 # Option 2: Create users manually
-.\Scripts\Create-Users.ps1
+.\Functions\Private\Create-Users.ps1
 
 # Option 3: Create users with custom settings
-.\Scripts\Create-Users.ps1 -UserCount 200 -RiskPercentage 25
+.\Functions\Private\Create-Users.ps1 -UserCount 200 -RiskPercentage 25
 ```
 
 **Why is this necessary?**
@@ -130,8 +130,9 @@ CSVActiveDirectory/
 │   └── LICENSE                          # License information
 │
 ├── 📁 Scripts/                          # Main script directory
-│   ├── Create-Users.ps1                 # User generation with security scenarios
-│   ├── Get-IOCs.ps1                     # Individual user IoC analysis
+│   ├── Create-Users-Menu.ps1           # Interactive user creation menu
+│   ├── Create-Users.ps1                 # User generation with security scenarios (Private)
+│   ├── Get-UserThreatAnalysis.ps1                     # Individual user IoC analysis
 │   ├── Get-SecurityReport.ps1                 # Enterprise security reports
 │   ├── Queries.ps1                      # Security query examples
 │   ├── Cleanup-Backups.ps1              # Backup management utility
@@ -199,23 +200,31 @@ CSVActiveDirectory/
 
 ## 📊 Available Scripts
 
-### Core Scripts
-- **`install.ps1`** - One-click installation with module setup and database creation
-- **`Create-Users.ps1`** - Generate test database with cybersecurity scenarios
-- **`Get-IOCs.ps1`** - Individual user IoC analysis with interactive HTML reports
-- **`Get-SecurityReport.ps1`** - Enterprise security reports with enhanced IoC detection
-- **`Queries.ps1`** - Individual security queries for focused analysis
-- **`Cleanup-Backups.ps1`** - Backup management with age-based deletion
+### Public Scripts (User-Friendly)
+Located in `Scripts/Public/` - Interactive scripts with menus for end users:
 
-### Utility Scripts
+- **`Create-Users-Menu.ps1`** - Interactive menu for user database creation
+- **`Get-UserThreatAnalysis.ps1`** - Individual user IoC analysis with interactive HTML reports
+- **`Get-SecurityReport.ps1`** - Enterprise security reports with enhanced IoC detection
+- **`Manage-Backups.ps1`** - Interactive backup management with menu options
+
+### Private Scripts (Advanced)
+Located in `Scripts/Private/` - Internal scripts for system administration:
+
+- **`Create-Users.ps1`** - Generate test database with cybersecurity scenarios (Advanced)
 - **`Test-ModuleFunctions.ps1`** - Test all module functions for compatibility
+- **`Test-PasswordComplexity.ps1`** - Password complexity testing utility
+- **`Cleanup-Backups.ps1`** - Advanced backup cleanup with direct parameter control
+
+### Installation
+- **`install.ps1`** - One-click installation with module setup and database creation
 
 ## 🎯 Quick Start
 
 ### Step 1: Create Users (Required)
 ```powershell
 # Create users with default settings (150 users, 30% risk)
-.\Scripts\Create-Users.ps1
+.\Functions\Private\Create-Users.ps1
 
 # Or use the one-click installer
 .\install.ps1
@@ -239,13 +248,13 @@ Get-ADUser -Filter "Department -eq 'Security'"
 ### Security Analysis
 ```powershell
 # Individual user IoC analysis
-.\Scripts\Get-IOCs.ps1 -Username "username"
+.\Scripts\Public\Get-UserThreatAnalysis.ps1 -Username "username"
 
 # Generate professional HTML report
-.\Scripts\Get-IOCs.ps1 -Username "username" -ExportReport /path/to/export/to
+.\Scripts\Public\Get-UserThreatAnalysis.ps1 -Username "username" -ExportReport /path/to/export/to
 
 # Enterprise security report with enhanced IoC detection
-.\Scripts\Get-SecurityReport.ps1
+.\Scripts\Public\Get-SecurityReport.ps1
 ```
 
 ### Creating Users
@@ -271,17 +280,22 @@ Remove-ADUser -Identity "jdoe" -Confirm:$false
 
 ### Database Management
 ```powershell
-# Clean up old backup files (older than 7 days)
-.\Scripts\Cleanup-Backups.ps1 -DeleteAfterDays 7
+# Interactive backup management (recommended for end users)
+.\Scripts\Public\Manage-Backups.ps1
+
+
+
+# Advanced backup cleanup (for administrators)
+.\Scripts\Private\Cleanup-Backups.ps1 -DeleteAfterDays 7
 
 # Preview what would be deleted
-.\Scripts\Cleanup-Backups.ps1 -DeleteAfterDays 7 -WhatIf
+.\Scripts\Private\Cleanup-Backups.ps1 -DeleteAfterDays 7 -WhatIf
 
 # Delete all backup files (with confirmation)
-.\Scripts\Cleanup-Backups.ps1 -DeleteAll
+.\Scripts\Private\Cleanup-Backups.ps1 -DeleteAll
 
 # Delete all backup files (no confirmation)
-.\Scripts\Cleanup-Backups.ps1 -DeleteAll -Force
+.\Scripts\Private\Cleanup-Backups.ps1 -DeleteAll -Force
 ```
 
 ## 📊 Available Properties
@@ -320,45 +334,4 @@ Remove-ADUser -Identity "jdoe" -Confirm:$false
 - **Performance**: < 30 seconds for IoC analysis of 1000+ users
 - **HTML Reports**: Interactive with clickable IoC items and collapsible sections
 
-See the test files in the `Tests/` directory for detailed testing results and performance metrics.
-
-## 🚀 Advanced Features
-
-### Enhanced HTML Reports
-- **Clickable IoC items** with detailed explanations
-- **Collapsible categories** for better organization
-- **Interactive confidence levels** with risk scoring
-- **Detailed log breakdowns** showing detection reasons
-- **Responsive design** for various screen sizes
-
-### IoC Detection
-- **Real-time threat analysis** with confidence scoring
-- **Multiple detection algorithms** for comprehensive coverage
-- **Risk-based prioritization** with actionable recommendations
-- **Individual user reports** stored in `RiskyUsers/` directory
-
-### Backup Management
-- **Automatic timestamped backups** during database operations
-- **Age-based cleanup** with safety confirmations
-- **Disk space management** to prevent storage issues
-- **WhatIf support** for safe preview of operations
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test in both PowerShell 5.1 and 7+
-5. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 📞 Support
-
-For issues, questions, or contributions:
-- Check the [Documentation](Docs/) folder
-- Review the test files in the `Tests/` directory for compatibility
-- Test your changes in both PowerShell versions
-- Ensure emoji compatibility using the `Get-Emoji` function
+See the test files in the `Tests/`

@@ -151,6 +151,11 @@ Function New-ADUser {
             'PhoneNumber' = $PhoneNumber
             'Mobile' = $Mobile
             'Company' = "AdNauseum Gaming"
+            # AD-like properties
+            'whenCreated' = $date
+            'whenChanged' = $date
+            'pwdLastSet' = $date
+            'accountExpires' = ""
         }
     }
     
