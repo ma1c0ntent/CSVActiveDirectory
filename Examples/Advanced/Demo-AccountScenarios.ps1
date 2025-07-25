@@ -13,46 +13,28 @@ Write-Host "1. Account Status Analysis" -ForegroundColor Yellow
 Write-Host "=========================" -ForegroundColor Yellow
 
 # Analyze account statuses with robust date parsing
-$LockedAccounts = $AllUsers | Where-Object { [int]$_.BadPasswordCount -ge 6 }
+$LockedAccounts = Search-ADAccount -LockedOut
 $DisabledAccounts = $AllUsers | Where-Object { $_.Enabled -eq "FALSE" }
-$HighActivityAccounts = $AllUsers | Where-Object { [int]$_.LogonCount -ge 200 }
+$HighActivityAccounts = $AllUsers | Where-Object { [int]$_.LogonCount -ge 100 -and [datetime]$_.whenCreated -ge $(Get-Date).AddDays(-30) }
 
 # Improved inactive accounts detection with better date parsing
 $InactiveAccounts = $AllUsers | Where-Object { 
     # Skip if LastLogon is empty or null
-    if ([string]::IsNullOrWhiteSpace($_.LastLogon)) {
+    if ([string]::IsNullOrWhiteSpace($_.LastLogonDate)) {
         return $false
     }
     
     try {
-        # Try multiple date formats
-        $LastLogon = $null
-        $DateFormats = @("M/d/yyyy h:mm tt", "M/d/yyyy H:mm", "yyyy-MM-dd HH:mm:ss", "M/d/yyyy")
-        
-        foreach ($Format in $DateFormats) {
-            if ([DateTime]::TryParseExact($_.LastLogon.Trim(), $Format, $null, [System.Globalization.DateTimeStyles]::None, [ref]$LastLogon)) {
-                break
-            }
-        }
-        
-        if ($LastLogon -ne $null) {
-            $DaysSinceLogon = ((Get-Date) - $LastLogon).Days
-            return $DaysSinceLogon -ge 30
-        }
-        return $false
+        [datetime]$_.LastLogonDate -le $(Get-Date).AddDays(-30)
     }
     catch {
-        # Only show warning for non-empty values that couldn't be parsed
-        if (![string]::IsNullOrWhiteSpace($_.LastLogon) -and ![string]::IsNullOrWhiteSpace($_.SamAccountName)) {
-            Write-Warning "Could not parse LastLogon date for user $($_.SamAccountName): '$($_.LastLogon)'"
-        }
         return $false
     }
 }
 
 Write-Host "Account Distribution:" -ForegroundColor Green
 Write-Host "  Total Users: $($AllUsers.Count)" -ForegroundColor White
-Write-Host "  Locked Out Accounts: $($LockedAccounts.Count)" -ForegroundColor Red
+Write-Host "  Locked Out Accounts: $($LockedAccounts.Name.Count)" -ForegroundColor Red
 Write-Host "  Disabled Accounts: $($DisabledAccounts.Count)" -ForegroundColor Yellow
 Write-Host "  High Activity Accounts: $($HighActivityAccounts.Count)" -ForegroundColor Green
 Write-Host "  Inactive Accounts (30+ days): $($InactiveAccounts.Count)" -ForegroundColor Magenta
