@@ -5,12 +5,12 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$false)]
-    [string]$OutputPath = "..\..\Data\Database\Database.csv"
+    [string]$OutputPath = "Data\Database\Database.csv"
 )
 
 # Import required modules
 try {
-    Import-Module ..\..\CSVActiveDirectory.psd1 -Force
+    Import-Module .\CSVActiveDirectory.psd1 -Force
 }
 catch {
     Write-Error "Failed to import CSVActiveDirectory module"
@@ -18,7 +18,7 @@ catch {
 }
 
 # Import shared detection logic for consistent risk calculation
-. $PSScriptRoot/../../Functions/Private/Detect-UserIoCs.ps1
+. Functions\Private\Detect-UserIoCs.ps1
 
 # Initialize emoji variables for compatibility
 $SuccessEmoji = Get-Emoji -Type "Success"
@@ -131,7 +131,7 @@ function Create-UsersWithParams {
     
     # Execute the actual Create-Users script
     try {
-        & "$PSScriptRoot\..\Private\Create-Users.ps1" @params
+        & "Scripts\Private\Create-Users.ps1" @params
         Write-Host "$($SuccessEmoji) Database created successfully!" -ForegroundColor Green
     }
     catch {
@@ -145,7 +145,7 @@ function Create-UsersWithParams {
 
 # Function to show current database info
 function Show-DatabaseInfo {
-    $dbPath = "..\..\Data\Database\Database.csv"
+    $dbPath = "Data\Database\Database.csv"
     
     if (Test-Path $dbPath) {
         try {
@@ -192,7 +192,7 @@ function Show-DatabaseInfo {
 $customConfig = @{
     UserCount = 100
     RiskPercentage = 30.0
-    OutputPath = "..\..\Data\Database\Database.csv"
+    OutputPath = "Data\Database\Database.csv"
     BackupExisting = $true
     SkipSecurityTest = $false
 }
@@ -240,7 +240,7 @@ do {
                         $customConfig.RiskPercentage = Get-UserInput "Enter risk percentage (0-100): " "30.0" "percentage"
                     }
                     "3" {
-                        $customConfig.OutputPath = Get-UserInput "Enter output path: " "..\..\Data\Database\Database.csv" "path"
+                        $customConfig.OutputPath = Get-UserInput "Enter output path: " "Data\Database\Database.csv" "path"
                     }
                     "4" {
                         $backupChoice = Read-Host "Create backup of existing database? (y/n): "
