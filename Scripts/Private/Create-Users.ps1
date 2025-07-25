@@ -7,7 +7,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$false)]
-    [string]$OutputPath = "..\..\Data\Database\Database.csv",
+    [string]$OutputPath = "Data\Database\Database.csv",
     
     [Parameter(Mandatory=$false)]
     [int]$UserCount = 30,  # Increased minimum to accommodate all IoC categories
@@ -30,7 +30,7 @@ Write-Host ""
 
 # Import required modules
 try {
-    Import-Module ..\..\CSVActiveDirectory.psd1 -Force
+    Import-Module .\CSVActiveDirectory.psd1 -Force
 }
 catch {
     Write-Error "Failed to import CSVActiveDirectory module"
@@ -38,7 +38,7 @@ catch {
 }
 
 # Import shared detection logic for consistent risk calculation
-. "..\..\Functions\Private\Detect-UserIoCs.ps1"
+. Functions\Private\Detect-UserIoCs.ps1
 
 # Initialize emoji variables for compatibility
 $SuccessEmoji = Get-Emoji -Type "Success"
@@ -93,15 +93,15 @@ Function Get-ManagerAssignment {
 }
 
 # Backup existing database if requested
-if ($BackupExisting -and (Test-Path "..\..\Data\Database\Database.csv")) {
+if ($BackupExisting -and (Test-Path "Data\Database\Database.csv")) {
     Write-Host "Creating backup using new single archive system..." -ForegroundColor Green
     
     # Import the backup function
     try {
-        . $PSScriptRoot/Backup-Database.ps1
+        . Functions\Private\Backup-Database.ps1
         
         # Create backup using the new system
-        $BackupResult = Backup-Database -DatabasePath "..\..\Data\Database\Database.csv" -BackupFolder "..\..\Data\Database\Backups" -BackupArchiveName "DatabaseBackups.zip"
+        $BackupResult = Backup-Database -DatabasePath "Data\Database\Database.csv" -BackupFolder "Data\Database\Backups" -BackupArchiveName "DatabaseBackups.zip"
         
         if ($BackupResult) {
             Write-Host "Successfully created backup using single archive system" -ForegroundColor Green
@@ -115,11 +115,11 @@ if ($BackupExisting -and (Test-Path "..\..\Data\Database\Database.csv")) {
         
         # Fallback to legacy method
         $timestamp = Get-Date -Format 'yyyyMMdd-HHmmss'
-        $BackupPath = "..\..\Data\Database\Database.backup.$timestamp.csv"
-$ZipPath = "..\..\Data\Database\Database.backup.$timestamp.zip"
+        $BackupPath = "Data\Database\Database.backup.$timestamp.csv"
+$ZipPath = "Data\Database\Database.backup.$timestamp.zip"
         
         # Create regular backup
-        Copy-Item "..\..\Data\Database\Database.csv" $BackupPath
+        Copy-Item "Data\Database\Database.csv" $BackupPath
         Write-Host "Backed up existing database to: $BackupPath" -ForegroundColor Green
         
         # Create zipped backup
@@ -968,7 +968,7 @@ try {
     if (-not $SkipSecurityTest) {
         Write-Host ""
         Write-Host "Testing enhanced database with security report..." -ForegroundColor Cyan
-        & "..\Scripts\Public\Get-SecurityReport.ps1" -DetailedReport
+        & "Scripts\Public\Get-SecurityReport.ps1" -DetailedReport
     } else {
         Write-Host ""
         Write-Host "Skipping security report test (use -SkipSecurityTest to skip)" -ForegroundColor Yellow
