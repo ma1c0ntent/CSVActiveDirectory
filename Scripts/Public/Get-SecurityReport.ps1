@@ -24,7 +24,7 @@ param(
     [switch]$ExportCSV = $false,
     
     [Parameter(Mandatory=$false)]
-    [string]$ExportPath = "..\..\Data\Reports\ADRiskAssessment$(Get-Date -Format 'yyyyMMdd-HHmmss').csv",
+    [string]$ExportPath = "Data\Reports\ADRiskAssessment$(Get-Date -Format 'yyyyMMdd-HHmmss').csv",
     
     [Parameter(Mandatory=$false)]
     [switch]$Interactive = $false
@@ -36,11 +36,11 @@ try {
 }
 catch {
     Write-Warning "Active Directory module not available. Using CSV simulation module."
-    Import-Module ..\..\CSVActiveDirectory.psd1 -Force
+    Import-Module .\CSVActiveDirectory.psd1 -Force
 }
 
 # Import shared detection logic
-. $PSScriptRoot/../Functions/Private/Detect-UserIoCs.ps1
+. "Functions\Private\Detect-UserIoCs.ps1"
 
 # Initialize emoji variables for compatibility
 try {
@@ -162,7 +162,7 @@ function Show-SystemInfo {
     
     # Check CSVActiveDirectory module
     try {
-        $CSVModule = Get-Module -Name CSVActiveDirectory -ListAvailable
+        $CSVModule = Get-Module -Name CSVActiveDirectory
         if ($CSVModule) {
             Write-Host "$($SuccessEmoji) CSVActiveDirectory module available" -ForegroundColor Green
             Write-Host "   Version: $($CSVModule.Version)" -ForegroundColor Cyan
@@ -175,7 +175,7 @@ function Show-SystemInfo {
     }
     
     # Check Reports directory
-    $ReportsDir = ".\Reports"
+    $ReportsDir = "Data\Reports"
     if (Test-Path $ReportsDir) {
         Write-Host "$($SuccessEmoji) Reports directory exists: $ReportsDir" -ForegroundColor Green
         $ReportCount = (Get-ChildItem -Path $ReportsDir -Filter "*.csv" | Measure-Object).Count
@@ -185,7 +185,7 @@ function Show-SystemInfo {
     }
     
     # Check for detection functions
-    $DetectionScript = "..\..\Functions\Private\Detect-UserIoCs.ps1"
+    $DetectionScript = "Functions\Private\Detect-UserIoCs.ps1"
     if (Test-Path $DetectionScript) {
         Write-Host "$($SuccessEmoji) IoC detection functions available" -ForegroundColor Green
     } else {
@@ -421,7 +421,7 @@ function Invoke-SecurityReport {
     if ($ExportCSV) {
         try {
             # Use the specified path or default path
-            $ExportPath = if ($ExportPath) { $ExportPath } else { ".\Reports\ADRiskAssessment$(Get-Date -Format 'yyyyMMdd-HHmmss').csv" }
+            $ExportPath = if ($ExportPath) { $ExportPath } else { "Data\Reports\ADRiskAssessment$(Get-Date -Format 'yyyyMMdd-HHmmss').csv" }
             
             # Ensure directory exists
             $ExportDir = Split-Path $ExportPath -Parent
@@ -511,7 +511,7 @@ if ($Interactive -or $PSBoundParameters.Count -eq 0) {
             }
             "4" {
                 # Export Security Report
-                $exportPath = ".\Reports\ADRiskAssessment$(Get-Date -Format 'yyyyMMdd-HHmmss').csv"
+                $exportPath = "Data\Reports\ADRiskAssessment$(Get-Date -Format 'yyyyMMdd-HHmmss').csv"
                 Invoke-SecurityReport -IncludeDisabled $true -DetailedReport $true -EnhancedIoCDetection $true -ExportCSV $true -ExportPath $exportPath
             }
             "5" {
@@ -539,7 +539,7 @@ if ($Interactive -or $PSBoundParameters.Count -eq 0) {
                         "6" {
                             $customConfig.ExportCSV = Get-UserInput "Export to CSV? (Y/N): " "N" "yesno"
                             if ($customConfig.ExportCSV) {
-                                $customConfig.ExportPath = Get-UserInput "Export path: " ".\Reports\ADRiskAssessment$(Get-Date -Format 'yyyyMMdd-HHmmss').csv"
+                                $customConfig.ExportPath = Get-UserInput "Export path: " "Data\Reports\ADRiskAssessment$(Get-Date -Format 'yyyyMMdd-HHmmss').csv"
                             }
                         }
                         "7" {
@@ -750,7 +750,7 @@ if ($Interactive -or $PSBoundParameters.Count -eq 0) {
     if ($ExportCSV) {
         try {
             # Use the specified path or default path
-            $ExportPath = if ($ExportPath) { $ExportPath } else { "ADSecurityReport\ADRiskAssessment$(Get-Date -Format 'yyyyMMdd-HHmmss').csv" }
+            $ExportPath = if ($ExportPath) { $ExportPath } else { "Data\Reports\ADRiskAssessment$(Get-Date -Format 'yyyyMMdd-HHmmss').csv" }
             
             # Ensure directory exists
             $ExportDir = Split-Path $ExportPath -Parent
