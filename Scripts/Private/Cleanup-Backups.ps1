@@ -5,7 +5,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $false)]
-    [string]$BackupPath = "..\..\Data\Database",
+    [string]$BackupPath = "Data\Database",
     
     [Parameter(Mandatory = $false)]
     [int]$DeleteAfterDays = 0,
@@ -24,9 +24,8 @@ param(
 )
 
 # Import the CSVActiveDirectory module
-$ModulePath = Join-Path -Path $PSScriptRoot -ChildPath ".." | Join-Path -ChildPath "CSVActiveDirectory.psm1"
-if (Test-Path $ModulePath) {
-    Import-Module $ModulePath -Force
+if (Test-Path .\CSVActiveDirectory.psd1) {
+    Import-Module .\CSVActiveDirectory.psd1 -Force
 } else {
     Write-Error "CSVActiveDirectory module not found at: $ModulePath"
     exit 1
@@ -210,7 +209,7 @@ function Show-CurrentBackups {
         
         # Import new backup functions
         try {
-            . $PSScriptRoot/../Functions/Private/Get-BackupInfo.ps1
+            . Functions\Private\Get-BackupInfo.ps1
             
             # Get backup info from archive
             $ArchiveBackups = Get-BackupInfo -BackupFolder $BackupFolder -BackupArchiveName "DatabaseBackups.zip" -WhatIf:$WhatIf
@@ -560,8 +559,8 @@ if ($Interactive -or $PSBoundParameters.Count -eq 0) {
         
         # Import new backup functions
         try {
-            . $PSScriptRoot/../Functions/Private/Get-BackupInfo.ps1
-            . $PSScriptRoot/../Functions/Private/Remove-OldBackups.ps1
+            . Functions/Private/Get-BackupInfo.ps1
+            . Functions/Private/Remove-OldBackups.ps1
             
             # Get backup info from archive
             $ArchiveBackups = Get-BackupInfo -BackupFolder $BackupFolder -BackupArchiveName "DatabaseBackups.zip" -WhatIf:$WhatIf
