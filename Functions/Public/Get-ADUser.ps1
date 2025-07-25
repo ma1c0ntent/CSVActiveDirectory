@@ -17,7 +17,7 @@ Function Get-ADUser {
         [string[]]$Properties
     )
     Begin {
-        $database = Import-Csv -Path "$PSScriptRoot\..\..\Data\Database\Database.csv"
+        $database = Import-Csv -Path "Data\Database\Database.csv"
     }
     Process {
         If ($PSCmdlet.ParameterSetName -eq "Filter") {
@@ -25,16 +25,14 @@ Function Get-ADUser {
             If ($Filter -eq "*") {
                 if ($Properties) {
                     $users = $database | Select-Object -Property $Properties
-                    foreach ($user in $users) {
-                        $user.PSTypeNames.Insert(0, "ADUserExtended")
-                    }
-                    return $users
+                    $ssers | Select-Object -Property $Properties
                 } else {
-                    $users = $database | Select-Object FirstName, LastName, DisplayName, SamAccountName, Enabled
+                    $users = $database | Select-Object DistinguisedName, FirstName, LastName, DisplayName, SamAccountName, Enabled
                     foreach ($user in $users) {
                         $user.PSTypeNames.Insert(0, "ADUser")
                     }
-                    return $users
+                    #return $users
+                    $User | Select-Object DistinguishedName, FirstName, LastName, DisplayName, SamAccountName, Enabled
                 }
             }
             Else {
@@ -43,16 +41,14 @@ Function Get-ADUser {
                 $results = Invoke-Expression -Command $Expression
                 if ($Properties) {
                     $users = $results | Select-Object -Property $Properties
-                    foreach ($user in $users) {
-                        $user.PSTypeNames.Insert(0, "ADUserExtended")
-                    }
-                    return $users
+                    $users | Select-Object -Property $Properties
                 } else {
-                    $users = $results | Select-Object FirstName, LastName, DisplayName, SamAccountName
+                    $users = $results | Select-Object DistinguishedName, FirstName, LastName, DisplayName, SamAccountName, Enabled
                     foreach ($user in $users) {
                         $user.PSTypeNames.Insert(0, "ADUser")
                     }
-                    return $users
+                    #return $users
+                    $User | Select-Object DistinguishedName, FirstName, LastName, DisplayName, SamAccountName, Enabled
                 }
                 Break
             }
@@ -61,16 +57,18 @@ Function Get-ADUser {
             If ($Identity -and (-not($Properties))) {
                 
                 If ($Identity -eq "*") {
-                    $users = $database | Select-Object FirstName, LastName, DisplayName, SamAccountName, Enabled
+                    $users = $database | Select-Object DistinguishedName, FirstName, LastName, DisplayName, SamAccountName, Enabled
                     foreach ($user in $users) {
                         $user.PSTypeNames.Insert(0, "ADUser")
                     }
-                    return $users
+                    #return $users
+                    $User | Select-Object DistinguishedName, FirstName, LastName, DisplayName, SamAccountName, Enabled
                 }
                 
                 $FoundUser = $database | Where-Object { $_.SamAccountName -match $Identity }
                 If ($FoundUser) {
                     $User = [PSCustomObject] @{
+                        'DistinguishedName' = $FoundUser.'DistinguishedName'
                         'FirstName' = $FoundUser.'FirstName'
                         'LastName'  = $FoundUser.'LastName'
                         'DisplayName' = $FoundUser.'DisplayName'
@@ -78,7 +76,8 @@ Function Get-ADUser {
                         'Enabled' = $FoundUser.'Enabled'
                     }
                     $User.PSTypeNames.Insert(0, "ADUser")
-                    return $User
+                    #return $User
+                    $User | Select-Object DistinguishedName, FirstName, LastName, DisplayName, SamAccountName, Enabled
                 }
                 Else {
                     Write-Warning "User not found"
@@ -88,19 +87,16 @@ Function Get-ADUser {
             ElseIf (($Identity -and $Properties)) {
                 If ($Identity -eq "*") {
                     $users = $database | Select-Object -Property $Properties
-                    foreach ($user in $users) {
-                        $user.PSTypeNames.Insert(0, "ADUserExtended")
-                    }
-                    return $users
+                    
+                    #return $users
+                    $Users | Select-Object -Property $Properties
                 }
                 
                 $FoundUser = $database | Where-Object { $_.SamAccountName -in $Identity }
                 If ($FoundUser) {
                     $users = $FoundUser | Select-Object -Property $Properties
-                    foreach ($user in $users) {
-                        $user.PSTypeNames.Insert(0, "ADUserExtended")
-                    }
-                    return $users
+                    #return $users
+                    $Users | Select-Object -Property $Properties
                 }
                 Else {
                     Write-Warning "User not found"
