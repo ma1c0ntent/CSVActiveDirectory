@@ -13,6 +13,10 @@ param(
     [switch]$Interactive
 )
 
+# Set the current working directory to the script's directory
+$CurrentDirectory = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
+Set-Location $CurrentDirectory
+
 # Initialize emoji variables for compatibility
 . .\Functions\Private\Get-Emoji.ps1
 $SuccessEmoji = Get-Emoji -Type "Success"
@@ -325,7 +329,7 @@ function Install-CSVActiveDirectory {
     Write-Host "  Get-ADUser -Identity '*'                    # List all users" -ForegroundColor White
     Write-Host "  Get-ADUser -Filter 'Department -eq \"IT\"'  # Filter users" -ForegroundColor White
     Write-Host "  .\Scripts\Private\Create-Users.ps1       # Generate database" -ForegroundColor White
-Write-Host "  .\Scripts\Public\Get-SecurityReport.ps1 -EnhancedIoCDetection  # Security scan" -ForegroundColor White
+    Write-Host "  .\Scripts\Public\Get-SecurityReport.ps1 -EnhancedIoCDetection  # Security scan" -ForegroundColor White
     Write-Host ""
     Write-Host "$($InfoEmoji) Documentation:" -ForegroundColor Yellow
     Write-Host "  README.md                                   # Main documentation" -ForegroundColor White
@@ -334,7 +338,7 @@ Write-Host "  .\Scripts\Public\Get-SecurityReport.ps1 -EnhancedIoCDetection  # S
     Write-Host ""
     Write-Host "$($BulbEmoji) Customization:" -ForegroundColor Yellow
     Write-Host "  Edit Scripts\Private\Create-Users.ps1    # Modify risk scenarios" -ForegroundColor White
-Write-Host "  Edit Scripts\Public\Get-SecurityReport.ps1 # Adjust security thresholds" -ForegroundColor White
+    Write-Host "  Edit Scripts\Public\Get-SecurityReport.ps1 # Adjust security thresholds" -ForegroundColor White
     Write-Host ""
     Write-Host "$($BulbEmoji) Pro Tips:" -ForegroundColor Yellow
     Write-Host "  - Use -EnhancedIoCDetection for advanced security scanning" -ForegroundColor White
