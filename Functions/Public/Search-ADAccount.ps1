@@ -67,7 +67,7 @@ Function Search-ADAccount {
 
     Begin {
         # Load database
-        $databasePath = "$PSScriptRoot\..\..\Data\Database\Database.csv"
+        $databasePath = "Data\Database\Database.csv"
         if (Test-Path $databasePath) {
             $database = Import-Csv -Path $databasePath
         } else {
