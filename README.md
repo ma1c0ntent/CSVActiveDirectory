@@ -77,10 +77,11 @@ Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
 - **`Queries.ps1`** - Individual security queries for focused analysis
 - **Professional HTML reports** with clickable IoC items and collapsible categories
 - **Color-coded severity levels** and actionable recommendations
-- **Individual user reports** stored in `RiskyUsers/` directory
+- **Individual user reports** stored in `Data/Reports/` directory
 
 ### 🧹 Database Management
 - **`Cleanup-Backups.ps1`** - Comprehensive backup management with age-based deletion
+- **`Manage-Backups.ps1`** - Console menu for enhanced database management to create backups, list backups, cleanup backups, etc.
 - **Automatic backup system** with timestamped files and ZIP compression
 - **Disk space management** with safety features and confirmation prompts
 
@@ -157,23 +158,23 @@ CSVActiveDirectory/
 │       └── Test-ADPasswordComplexity.ps1
 │
 ├── 📁 Data/                             # Data storage
-│   ├── Database/                        # Database files
+│   │   ├── Database/                        # Database files
+│   │   ├── Backups/
+│   │   │   └──  DatabaseBackups.zip
 │   │   ├── Database.csv                 # Current database
-│   │   └── Database.backup.*.csv       # Backup files (30+)
+│   │   └── example-database.csv
 │   ├── Config/                          # Configuration
 │   │   └── Settings.json
 │   └── Formats/                         # Display formats
 │       └── ADUser.format.ps1xml
-│
-├── 📁 RiskyUsers/                       # IoC HTML reports (generated)
-│   └── IoC_*.html                      # Individual user reports
 │
 ├── 📁 Examples/                         # Usage examples
 │   ├── Basic/
 │   │   └── Demo-BasicFeatures.ps1
 │   └── Advanced/
 │       ├── Demo-EnhancedFeatures.ps1
-│       └── Demo-AccountScenarios.ps1
+│       ├── Demo-AccountScenarios.ps1
+│       └── Demo-DetectionQueries.ps1
 │
 ├── 📁 Tests/                            # Test scripts
 │   ├── Integration/
