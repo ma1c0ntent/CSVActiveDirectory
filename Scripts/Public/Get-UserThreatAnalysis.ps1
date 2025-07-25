@@ -14,7 +14,7 @@ param(
     [switch]$ExportReport = $true,
     
     [Parameter(Mandatory=$false)]
-    [string]$ExportPath = "..\..\Data\Reports",
+    [string]$ExportPath = "Data\Reports",
     
     [Parameter(Mandatory=$false)]
     [switch]$Interactive = $false
@@ -26,7 +26,7 @@ try {
 }
 catch {
     Write-Warning "Active Directory module not available. Using CSV simulation module."
-    Import-Module ..\..\CSVActiveDirectory.psd1 -Force
+    Import-Module .\CSVActiveDirectory.psd1 -Force
 }
 
 # Initialize emoji variables for compatibility
@@ -192,7 +192,7 @@ function Show-SystemInfo {
     }
     
     # Check Reports directory
-    $ReportsDir = ".\Reports"
+    $ReportsDir = "Data\Reports"
     if (Test-Path $ReportsDir) {
         Write-Host "$($SuccessEmoji) Reports directory exists: $ReportsDir" -ForegroundColor Green
         $ReportCount = (Get-ChildItem -Path $ReportsDir -Filter "*.html" | Measure-Object).Count
@@ -202,7 +202,7 @@ function Show-SystemInfo {
     }
     
     # Check for detection functions
-    $DetectionScript = "..\..\Functions\Private\Detect-UserIoCs.ps1"
+    $DetectionScript = "Functions\Private\Detect-UserIoCs.ps1"
     if (Test-Path $DetectionScript) {
         Write-Host "$($SuccessEmoji) IoC detection functions available" -ForegroundColor Green
     } else {
