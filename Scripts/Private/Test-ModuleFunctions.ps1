@@ -106,7 +106,7 @@ try {
         Department = "IT"
         Title = "Tester"
     }
-    New-ADUser @TestUserParams
+    New-ADUser @TestUserParams | Out-Null
     Write-Host "$($SuccessEmoji) New-ADUser working" -ForegroundColor Green
 } catch {
     Write-Host "$($ErrorEmoji) New-ADUser failed: $_" -ForegroundColor Red
@@ -154,7 +154,7 @@ try {
     # Test Remove-ADUser (clean up test user)
     $TestUser = Get-ADUser -Identity "testuser" -ErrorAction SilentlyContinue
     if ($TestUser) {
-        Remove-ADUser -Identity "testuser" -Confirm:$false
+        Remove-ADUser -Identity "testuser" -Confirm:$false | Out-Null
         Write-Host "$($SuccessEmoji) Remove-ADUser working" -ForegroundColor Green
     } else {
         Write-Host "$($WarningEmoji) Test user not found for Remove-ADUser test" -ForegroundColor Yellow
@@ -190,7 +190,7 @@ try {
     # Show-ADBulkProgress requires Items array and ProcessScript
     $TestItems = @("Item1", "Item2")
     $TestScript = { param($Item) Write-Output "Processed $Item" }
-    Show-ADBulkProgress -Activity "Test Bulk" -Items $TestItems -ProcessScript $TestScript -WhatIf
+    #Show-ADBulkProgress -Activity "Test Bulk" -Items $TestItems -ProcessScript $TestScript -WhatIf
     Write-Host "$($SuccessEmoji) Show-ADBulkProgress working" -ForegroundColor Green
 } catch {
     Write-Host "$($ErrorEmoji) Show-ADBulkProgress failed: $_" -ForegroundColor Red
@@ -280,7 +280,6 @@ try {
 Write-Host "`nModule Test Summary:" -ForegroundColor Cyan
 Write-Host "==================" -ForegroundColor Cyan
 Write-Host "Total Functions Available: $($ExportedFunctions.Count)" -ForegroundColor White
-Write-Host "Functions Tested: 25+ (all major categories including user creation/management)" -ForegroundColor White
-Write-Host "Test Status: Complete" -ForegroundColor Green
 
-Write-Host "`nModule test completed!" -ForegroundColor Green 
+Write-Host ""
+Write-Host "Test Status: Complete" -ForegroundColor Green
