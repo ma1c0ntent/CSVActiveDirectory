@@ -9,7 +9,7 @@ Function Enable-ADAccount {
         [string[]]$Identity
     )
     Begin {
-        $database = Import-Csv -Path "$PSScriptRoot\..\..\Data\Database\Database.csv"
+        $database = Import-Csv -Path "Data\Database\Database.csv"
         $datetime = Get-Date
         $date = $datetime.ToShortDateString()
         $time = $datetime.ToShortTimeString()
@@ -35,6 +35,6 @@ Function Enable-ADAccount {
         }
     }
     End {
-       $database | Export-Csv -Path "$PSScriptRoot\..\..\Data\Database\Database.csv" -NoTypeInformation
+       $database | Export-Csv -Path "Data\Database\Database.csv" -NoTypeInformation
     }
 }
