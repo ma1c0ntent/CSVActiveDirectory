@@ -6,7 +6,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $false)]
-    [string]$BackupFolder = "..\..\Data\Database\Backups",
+    [string]$BackupFolder = "Data\Database\Backups",
     
     [Parameter(Mandatory = $false)]
     [string]$BackupArchiveName = "DatabaseBackups.zip",
@@ -30,7 +30,7 @@ param(
     [switch]$CreateBackup = $false,
     
     [Parameter(Mandatory = $false)]
-    [string]$DatabasePath = "..\..\Data\Database\Database.csv",
+    [string]$DatabasePath = "Data\Database\Database.csv",
     
     [Parameter(Mandatory = $false)]
     [switch]$WhatIf = $false,
@@ -176,9 +176,9 @@ function Show-SystemInfo {
     }
     
     # Check for backup functions
-    $BackupScript = "..\..\Functions\Private\Backup-Database.ps1"
-$BackupInfoScript = "..\..\Functions\Private\Get-BackupInfo.ps1"
-$RemoveBackupsScript = "..\..\Functions\Private\Remove-OldBackups.ps1"
+    $BackupScript = "Functions\Private\Backup-Database.ps1"
+    $BackupInfoScript = "Functions\Private\Get-BackupInfo.ps1"
+    $RemoveBackupsScript = "Functions\Private\Remove-OldBackups.ps1"
     
     if (Test-Path $BackupScript) {
         Write-Host "$($SuccessEmoji) Backup functions available" -ForegroundColor Green
@@ -187,7 +187,7 @@ $RemoveBackupsScript = "..\..\Functions\Private\Remove-OldBackups.ps1"
     }
     
     # Check available disk space
-    $Drive = Split-Path $BackupFolder -Qualifier
+    $Drive = Resolve-Path -path $BackupFolder | Select-Object -ExpandProperty Path | Split-Path -Qualifier
     $DriveInfo = Get-WmiObject -Class Win32_LogicalDisk -Filter "DeviceID='$Drive'"
     if ($DriveInfo) {
         $FreeSpace = $DriveInfo.FreeSpace
@@ -246,7 +246,7 @@ function Invoke-CreateBackup {
     
     try {
         # Import required functions
-        . $PSScriptRoot/../Functions/Private/Backup-Database.ps1
+        . "Functions\Private\Backup-Database.ps1"
         
         $BackupResult = Backup-Database -DatabasePath $DatabasePath -BackupFolder $BackupFolder -BackupArchiveName $BackupArchiveName -WhatIf:$WhatIf
         
@@ -272,7 +272,7 @@ function Invoke-ListBackups {
     
     try {
         # Import required functions
-        . $PSScriptRoot/../Functions/Private/Get-BackupInfo.ps1
+        . "Functions\Private\Get-BackupInfo.ps1"
         
         $BackupFiles = Get-BackupInfo -BackupFolder $BackupFolder -BackupArchiveName $BackupArchiveName -Detailed:$Detailed -WhatIf:$WhatIf
         
@@ -299,7 +299,7 @@ function Invoke-CleanupBackups {
     
     try {
         # Import required functions
-        . $PSScriptRoot/../Functions/Private/Remove-OldBackups.ps1
+        . "Functions\Private\Remove-OldBackups.ps1"
         
         $CleanupResult = Remove-OldBackups -BackupFolder $BackupFolder -BackupArchiveName $BackupArchiveName -KeepDays $KeepDays -KeepCount $KeepCount -WhatIf:$WhatIf -Force:$Force
         
@@ -407,9 +407,9 @@ if ($Interactive -or $PSBoundParameters.Count -eq 0) {
 
     # Import required functions
     try {
-        . $PSScriptRoot/../Functions/Private/Backup-Database.ps1
-        . $PSScriptRoot/../Functions/Private/Get-BackupInfo.ps1
-        . $PSScriptRoot/../Functions/Private/Remove-OldBackups.ps1
+        . "Functions\Private\Backup-Database.ps1"
+        . "Functions\Private\Get-BackupInfo.ps1"
+        . "Functions\Private\Remove-OldBackups.ps1"
     }
     catch {
         Write-Error "$($ErrorEmoji) Failed to import backup functions: $($_.Exception.Message)"
@@ -492,9 +492,9 @@ if ($Interactive -or $PSBoundParameters.Count -eq 0) {
         Write-Host ""
         Write-Host "Examples:" -ForegroundColor Yellow
         Write-Host "  .\Scripts\Public\Manage-Backups.ps1 -CreateBackup" -ForegroundColor Gray
-Write-Host "  .\Scripts\Public\Manage-Backups.ps1 -List -Detailed" -ForegroundColor Gray
-Write-Host "  .\Scripts\Public\Manage-Backups.ps1 -Cleanup -KeepDays 7 -KeepCount 10" -ForegroundColor Gray
-Write-Host "  .\Scripts\Public\Manage-Backups.ps1 -Cleanup -WhatIf" -ForegroundColor Gray
+Write-Host "  Scripts\Public\Manage-Backups.ps1 -List -Detailed" -ForegroundColor Gray
+Write-Host "  Scripts\Public\Manage-Backups.ps1 -Cleanup -KeepDays 7 -KeepCount 10" -ForegroundColor Gray
+Write-Host "  Scripts\Public\Manage-Backups.ps1 -Cleanup -WhatIf" -ForegroundColor Gray
     }
 
     Write-Host ""
