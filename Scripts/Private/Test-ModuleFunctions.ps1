@@ -3,7 +3,7 @@ Write-Host "Testing CSVActiveDirectory Module Functions" -ForegroundColor Cyan
 Write-Host "=========================================" -ForegroundColor Cyan
 
 # Import the module
-Import-Module ..\..\CSVActiveDirectory.psd1 -Force
+Import-Module .\CSVActiveDirectory.psd1 -Force
 
 # Initialize emoji variables for compatibility
 $SuccessEmoji = Get-Emoji -Type "Success"
